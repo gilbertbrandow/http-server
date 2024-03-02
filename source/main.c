@@ -5,6 +5,8 @@
  * (©) Copyright MIT License.
  **/
 
+#include "server.h"
+
 void main() {
     
 }
