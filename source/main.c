@@ -1,18 +1,22 @@
 /**
+ * @file main.c
+ * @brief Entry point for the server application.
+ * 
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 1st of March 2024
  * 
  * (©) Copyright MIT License.
- **/
+ */
 
 #include "server.h"
 
-void launch(struct Server *server) {
-    while(1) {
-        printf("<-- READY TO CONNECT ON %d::%d -->\n", server->domain, server->port);
-    }
-}
-
+/**
+ * @brief Main function for the server application.
+ *
+ * This function initializes a server, launches it, and returns.
+ *
+ * @return The exit status of the program (EXIT_SUCCESS on success).
+ */
 int main() {
     struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8000, 5, launch); 
     server.launch(&server);

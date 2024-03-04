@@ -1,4 +1,7 @@
 /**
+ * @file server.c
+ * @brief Contains the implementation of server_constructor - & launch functions.
+ * 
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 2nd of March 2024
  *
@@ -30,9 +33,9 @@ struct Server server_constructor(
 
     server.socket = socket(domain, service, protocol);
 
-    if (server.socket == 0)
+    if (server.socket == -1)
     {
-        perror("Failed to connect to socket \n");
+        perror("Failed to create socket \n");
         exit(EXIT_FAILURE);
     }
 
@@ -40,7 +43,7 @@ struct Server server_constructor(
     {
         perror("Failed to bind to socket \n");
         exit(EXIT_FAILURE);
-    };
+    }
 
     if (listen(server.socket, server.backlog) < 0)
     {
@@ -52,3 +55,9 @@ struct Server server_constructor(
 
     return server;
 };
+
+void launch(struct Server *server) {
+    while(1) {
+        printf("<-- READY TO CONNECT ON %d::%d -->\n", server->domain, server->port);
+    }
+}
