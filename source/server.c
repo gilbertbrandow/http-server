@@ -10,6 +10,19 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * Constructor function to initialize and configure a server.
+ *
+ * @param domain       The communication domain (e.g., AF_INET for IPv4).
+ * @param service      The type of service (e.g., SOCK_STREAM for TCP{Transmission Control Protocol}).
+ * @param protocol     The protocol to be used (0 for default protocol based on service).
+ * @param interface    The interface address to bind to (use INADDR_ANY for any available interface).
+ * @param port         The port number to bind the server to.
+ * @param backlog      The maximum length of the queue of pending connections.
+ * @param launch       Pointer to the function that will be called when the server is launched.
+ *
+ * @return struct Server instance representing the configured server.
+ */
 struct Server server_constructor(
     int domain,
     int service,
@@ -28,28 +41,28 @@ struct Server server_constructor(
     server.backlog = backlog;
     server.launch = launch;
 
-    server.address.sin_family = domain;
-    server.address.sin_port = htons(port);
-    server.address.sin_addr.s_addr = htonl(interface);
+    server.socketaddr_in.sin_family = domain;
+    server.socketaddr_in.sin_port = htons(port);
+    server.socketaddr_in.sin_addr.s_addr = htonl(interface);
 
     server.socket = socket(domain, service, protocol);
 
     if (server.socket == 0)
     {
         perror("Failed to connect to socket \n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    if (bind(server.socket, (struct sockaddr *)&server.address, sizeof(server.address)) < 0)
+    if (bind(server.socket, (struct sockaddr *)&server.socketaddr_in, sizeof(server.socketaddr_in)) < 0)
     {
         perror("Failed to bind to socket \n");
-        exit(1);
+        exit(EXIT_FAILURE);
     };
 
     if (listen(server.socket, server.backlog) < 0)
     {
         perror("Failed to listen to socket \n");
-        exit(1);
+        exit(EXIT_FAILURE);
     };
 
     server.launch = launch;
