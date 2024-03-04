@@ -10,19 +10,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-/**
- * Constructor function to initialize and configure a server.
- *
- * @param domain       The communication domain (e.g., AF_INET for IPv4).
- * @param service      The type of service (e.g., SOCK_STREAM for TCP{Transmission Control Protocol}).
- * @param protocol     The protocol to be used (0 for default protocol based on service).
- * @param interface    The interface address to bind to (use INADDR_ANY for any available interface).
- * @param port         The port number to bind the server to.
- * @param backlog      The maximum length of the queue of pending connections.
- * @param launch       Pointer to the function that will be called when the server is launched.
- *
- * @return struct Server instance representing the configured server.
- */
 struct Server server_constructor(
     int domain,
     int service,
@@ -30,7 +17,7 @@ struct Server server_constructor(
     u_long interface,
     int port,
     int backlog,
-    void (*launch)(void))
+    void (*launch)(struct Server *server))
 {
     struct Server server;
     server.domain = domain;
@@ -39,7 +26,6 @@ struct Server server_constructor(
     server.interface = interface;
     server.port = port;
     server.backlog = backlog;
-    server.launch = launch;
 
     server.socketaddr_in.sin_family = domain;
     server.socketaddr_in.sin_port = htons(port);

@@ -22,7 +22,7 @@ struct Server {
     u_long interface;
     struct sockaddr_in socketaddr_in; 
 
-    void (*launch)(void);
+    void (*launch)(struct Server *server);
 };
 
 /**
@@ -45,7 +45,7 @@ struct Server server_constructor(
     u_long interface, 
     int port, 
     int backlog, 
-    void(*launch)(void)
+    void(*launch)(struct Server *server)
 );
 
 #endif

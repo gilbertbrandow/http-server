@@ -6,7 +6,18 @@
  **/
 
 #include "server.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-void main() {
-    
+void launch(struct Server *server) {
+    while(1) {
+        printf("<-- READY TO CONNECT ON %d::%d -->\n", server->domain, server->port);
+    }
+}
+
+int main() {
+    struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8000, 5, launch); 
+    server.launch(&server);
+
+    return(EXIT_SUCCESS);
 }
