@@ -6,8 +6,6 @@
  **/
 
 #include "server.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 void launch(struct Server *server) {
     while(1) {

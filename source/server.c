@@ -6,9 +6,6 @@
  **/
 
 #include "../include/server.h"
-#include <netinet/in.h>
-#include <stdlib.h>
-#include <stdio.h>
 
 struct Server server_constructor(
     int domain,
