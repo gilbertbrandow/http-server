@@ -1,6 +1,6 @@
 /**
- * Author:    Simon Gustafsson (@gilbertbrandow)
- * Created:   1st of March 2024
+ * Original author: Simon Gustafsson (@gilbertbrandow)
+ * Created: 1st of March 2024
  * 
  * (©) Copyright MIT License.
  **/
@@ -20,7 +20,7 @@ struct Server {
     int backlog;
 
     struct sockaddr_in address; 
-    
+
     int socket;
 
     void (*launch)(void);
