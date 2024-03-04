@@ -1,7 +1,10 @@
 /**
+ * @file server.h
+ * @brief Contains the prototypes for server struct, server_constructor - & launch function.
+ *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 1st of March 2024
- * 
+ *
  * (©) Copyright MIT License.
  **/
 
@@ -13,16 +16,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct Server {
+struct Server
+{
     int domain;
-    int service; 
-    int protocol; 
-    int port; 
+    int service;
+    int protocol;
+    int port;
     int backlog;
     int socket;
 
     u_long interface;
-    struct sockaddr_in socketaddr_in; 
+    struct sockaddr_in socketaddr_in;
 
     void (*launch)(struct Server *server);
 };
@@ -41,13 +45,22 @@ struct Server {
  * @return struct Server instance representing the configured server.
  */
 struct Server server_constructor(
-    int domain, 
-    int service, 
-    int protocol, 
-    u_long interface, 
-    int port, 
-    int backlog, 
-    void(*launch)(struct Server *server)
-);
+    int domain,
+    int service,
+    int protocol,
+    u_long interface,
+    int port,
+    int backlog,
+    void (*launch)(struct Server *server));
+
+/**
+ * @brief Launch the server and display status messages.
+ *
+ * This function continuously prints a message indicating that the server is ready to connect
+ * on a specified domain and port.
+ *
+ * @param server A pointer to the Server structure representing the server instance.
+ */
+void launch(struct Server *);
 
 #endif
