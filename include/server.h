@@ -13,10 +13,8 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <stdlib.h>
-#include <stdio.h>
 
-struct Server
+struct server
 {
     int domain;
     int service;
@@ -28,7 +26,7 @@ struct Server
     u_long interface;
     struct sockaddr_in socketaddr_in;
 
-    void (*launch)(struct Server *server);
+    void (*launch)(struct server *server);
 };
 
 /**
@@ -42,25 +40,26 @@ struct Server
  * @param backlog      The maximum length of the queue of pending connections.
  * @param launch       Pointer to the function that will be called when the server is launched.
  *
- * @return struct Server instance representing the configured server.
+ * @return struct server instance representing the configured server.
  */
-struct Server server_constructor(
+struct server server_constructor(
     int domain,
     int service,
     int protocol,
     u_long interface,
     int port,
     int backlog,
-    void (*launch)(struct Server *server));
+    void (*launch)(struct server *server));
 
 /**
- * @brief Launch the server and display status messages.
+ * @brief Launches the server and listens for incoming connections.
  *
- * This function continuously prints a message indicating that the server is ready to connect
- * on a specified domain and port.
+ * This function sets up a server to listen for incoming connections on the specified domain and port.
+ * It continuously accepts incoming connections, reads data from the client, sends a predefined response,
+ * and then closes the connection.
  *
- * @param server A pointer to the Server structure representing the server instance.
+ * @param server A pointer to the server structure containing server configuration and state.
  */
-void launch(struct Server *);
+void launch(struct server *);
 
 #endif

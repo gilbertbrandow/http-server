@@ -9,6 +9,7 @@
  */
 
 #include "server.h"
+#include <stdlib.h>
 
 /**
  * @brief Main function for the server application.
@@ -18,7 +19,7 @@
  * @return The exit status of the program (EXIT_SUCCESS on success).
  */
 int main() {
-    struct Server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8000, 5, launch); 
+    struct server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8000, 5, launch); 
     server.launch(&server);
 
     return(EXIT_SUCCESS);
