@@ -8,23 +8,23 @@
  * (©) Copyright MIT License.
  **/
 
-#include "../include/server.h"'
+#include "../include/server.h"
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
 
-struct Server server_constructor(
+struct server server_constructor(
     int domain,
     int service,
     int protocol,
     u_long interface,
     int port,
     int backlog,
-    void (*launch)(struct Server *server))
+    void (*launch)(struct server *server))
 {
-    struct Server server;
+    struct server server;
     server.domain = domain;
     server.service = service;
     server.protocol = protocol;
@@ -61,7 +61,7 @@ struct Server server_constructor(
     return server;
 };
 
-void launch(struct Server *server) {
+void launch(struct server *server) {
     char buffer[30000]; 
     const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world!";
     int address_length = sizeof(server->socketaddr_in);
