@@ -52,3 +52,11 @@ int get_address_family() {
 int get_protocol() {
     return protocol;
 }
+
+int get_port() {
+    return port;
+}
+
+int get_backlog() {
+    return backlog;
+}
