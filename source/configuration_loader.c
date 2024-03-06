@@ -6,6 +6,7 @@
 #include <string.h>
 
 static char address_family[50];
+static int protocol;
 
 void load_configuration_variables(const char *filename) {
     
@@ -17,6 +18,7 @@ void load_configuration_variables(const char *filename) {
     }
 
     fscanf(file, "ADDRESS_FAMILY=%49s", address_family);
+    fscanf(file, "PROTOCOL=%d\n", &protocol);
 
     fclose(file);
 }
@@ -31,4 +33,8 @@ int get_address_family() {
     perror("Error reading the ADDRESS_FAMILY variable");
     fprintf(stderr, "The value '%s' defined as ADDRESS_FAMILY is not a valid value, try AF_INET or AF_INET6.\n", address_family);
     exit(EXIT_FAILURE);
+}
+
+int get_protocol() {
+    return protocol;
 }
