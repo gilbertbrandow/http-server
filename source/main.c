@@ -9,6 +9,7 @@
  */
 
 #include "server.h"
+#include "configuration_loader.h"
 #include <stdlib.h>
 
 /**
@@ -19,7 +20,8 @@
  * @return The exit status of the program (EXIT_SUCCESS on success).
  */
 int main() {
-    struct server server = server_constructor(AF_INET, SOCK_STREAM, 0, INADDR_ANY, 8000, 5, launch); 
+    load_configuration_variables(".env");
+    struct server server = server_constructor(get_address_family(), get_socket_type(), get_protocol(), get_domain(), get_port(), get_backlog(), launch); 
     server.launch(&server);
 
     return(EXIT_SUCCESS);

@@ -16,8 +16,8 @@
 #include <string.h>
 
 struct server server_constructor(
-    int domain,
-    int service,
+    int address_family,
+    int socket_type,
     int protocol,
     u_long interface,
     int port,
@@ -25,18 +25,18 @@ struct server server_constructor(
     void (*launch)(struct server *server))
 {
     struct server server;
-    server.domain = domain;
-    server.service = service;
+    server.address_family = address_family;
+    server.socket_type = socket_type;
     server.protocol = protocol;
     server.interface = interface;
     server.port = port;
     server.backlog = backlog;
 
-    server.socketaddr_in.sin_family = domain;
+    server.socketaddr_in.sin_family = address_family;
     server.socketaddr_in.sin_port = htons(port);
     server.socketaddr_in.sin_addr.s_addr = htonl(interface);
 
-    server.socket = socket(domain, service, protocol);
+    server.socket = socket(address_family, socket_type, protocol);
 
     if (server.socket == -1)
     {
