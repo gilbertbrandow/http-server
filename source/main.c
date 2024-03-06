@@ -21,7 +21,7 @@
  */
 int main() {
     load_configuration_variables(".env");
-    struct server server = server_constructor(get_address_family(), SOCK_STREAM, get_protocol(), INADDR_ANY, get_port(), get_backlog(), launch); 
+    struct server server = server_constructor(get_address_family(), get_socket_type(), get_protocol(), get_domain(), get_port(), get_backlog(), launch); 
     server.launch(&server);
 
     return(EXIT_SUCCESS);

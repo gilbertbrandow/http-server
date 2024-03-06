@@ -45,8 +45,32 @@ int get_address_family() {
     }
 
     perror("Error reading the ADDRESS_FAMILY variable");
-    fprintf(stderr, "The value '%s' defined as ADDRESS_FAMILY is not a valid value, try AF_INET or AF_INET6.\n", address_family);
+    fprintf(stderr, "The value '%s' defined for ADDRESS_FAMILY is not a valid value, try AF_INET or AF_INET6.\n", address_family);
     exit(EXIT_FAILURE);
+}
+
+int get_socket_type() {
+    if (strcmp(socket_type, "SOCK_STREAM") == 0) {
+        return SOCK_STREAM;
+    } else if (strcmp(socket_type, "SOCK_DGRAM") == 0) {
+        return SOCK_DGRAM;
+    }  else if (strcmp(socket_type, "SOCK_SEQPACKET") == 0) {
+        return SOCK_SEQPACKET;
+    }  else if (strcmp(socket_type, "SOCK_RAW") == 0) {
+        return SOCK_RAW;
+    }
+
+    perror("Error reading the SOCKET_TYPE variable");
+    fprintf(stderr, "The value '%s' defined for SOCKET_TYPE is not a valid value, try SOCK_STREAM, SOCK_DGRAM, SOCK_SEQPACKET or SOCK_RAW.\n", socket_type);
+    exit(EXIT_FAILURE);
+}
+
+uint32_t get_domain() {
+    if (strcmp(domain, "INADDR_ANY") == 0) {
+        return INADDR_ANY;
+    } else {
+        return (uint32_t)strtoul(domain, NULL, 10);     
+    }
 }
 
 int get_protocol() {
