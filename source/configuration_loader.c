@@ -28,11 +28,6 @@ void load_configuration_variables(const char *filename) {
     fscanf(file, "%*[^=]=%d\n", &protocol);
     fscanf(file, "%*[^=]=%d\n", &port);
     fscanf(file, "%*[^=]=%d\n", &backlog);
-   
-
-    printf("ADDRESS_FAMILY: %s\n", address_family);
-    printf("PORT: %d\n", port);
-    printf("PROTOCOL: %d\n", protocol);
 
     fclose(file);
 }
