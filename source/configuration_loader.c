@@ -6,7 +6,11 @@
 #include <string.h>
 
 static char address_family[50];
+static char socket_type[50];
+static char domain[50];
 static int protocol;
+static int port;
+static int backlog;
 
 void load_configuration_variables(const char *filename) {
     
@@ -17,8 +21,18 @@ void load_configuration_variables(const char *filename) {
         exit(EXIT_FAILURE);
     }
 
-    fscanf(file, "ADDRESS_FAMILY=%49s", address_family);
-    fscanf(file, "PROTOCOL=%d\n", &protocol);
+
+    fscanf(file, "%*[^=]=%49s\n", address_family);
+    fscanf(file, "%*[^=]=%49s\n", socket_type);
+    fscanf(file, "%*[^=]=%49s\n", domain);
+    fscanf(file, "%*[^=]=%d\n", &protocol);
+    fscanf(file, "%*[^=]=%d\n", &port);
+    fscanf(file, "%*[^=]=%d\n", &backlog);
+   
+
+    printf("ADDRESS_FAMILY: %s\n", address_family);
+    printf("PORT: %d\n", port);
+    printf("PROTOCOL: %d\n", protocol);
 
     fclose(file);
 }
