@@ -1,20 +1,25 @@
+/**
+ * @file configuration_loader.c
+ * @brief Functions for loading and retrieving network configuration variables from a file.
+ *
+ * Original author: Simon Gustafsson (@gilbertbrandow)
+ * Created: 5th of March 2024
+ *
+ * (©) Copyright MIT License.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <stddef.h>
 #include <netinet/in.h>
 #include <string.h>
-
-static char address_family[50];
-static char socket_type[50];
-static char domain[50];
-static int protocol;
-static int port;
-static int backlog;
+#include <configuration_loader.h>
 
 void load_configuration_variables(const char *filename) {
     
     FILE *file = fopen(filename, "r");
+
     if (file == NULL) {
         perror("Error opening config file");
         fprintf(stderr, "Make sure you have a '%s' file.\n", filename);
