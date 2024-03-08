@@ -16,31 +16,75 @@
 #include <string.h>
 #include <configuration_loader.h>
 
-void load_configuration_variables(const char *filename) {
-    
+void load_configuration_variables(const char *filename)
+{
+
     FILE *file = fopen(filename, "r");
 
-    if (file == NULL) {
+    if (file == NULL)
+    {
         perror("Error opening config file");
         fprintf(stderr, "Make sure you have a '%s' file.\n", filename);
         exit(EXIT_FAILURE);
     }
 
+    char line[200];
 
-    fscanf(file, "%*[^=]=%49s\n", address_family);
-    fscanf(file, "%*[^=]=%49s\n", socket_type);
-    fscanf(file, "%*[^=]=%49s\n", domain);
-    fscanf(file, "%*[^=]=%d\n", &protocol);
-    fscanf(file, "%*[^=]=%d\n", &port);
-    fscanf(file, "%*[^=]=%d\n", &backlog);
+    while (fgets(line, sizeof(line), file) != NULL)
+    {
+        if (line[0] == '\0' || line[0] == '#')
+        {
+            continue;
+        }
+
+        char key[50];
+        char value[50];
+
+        if (sscanf(line, "%49[^=]=%49s", key, value) == 2)
+        {
+            if (strcmp(key, "ADDRESS_FAMILY") == 0)
+            {
+                snprintf(address_family, sizeof(address_family), "%s", value);
+            }
+            else if (strcmp(key, "SOCKET_TYPE") == 0)
+            {
+                snprintf(socket_type, sizeof(socket_type), "%s", value);
+            }
+            else if (strcmp(key, "DOMAIN") == 0)
+            {
+                snprintf(domain, sizeof(domain), "%s", value);
+            }
+            else if (strcmp(key, "PROTOCOL") == 0)
+            {
+                protocol = atoi(value);
+            }
+            else if (strcmp(key, "PORT") == 0)
+            {
+                port = atoi(value);
+            }
+            else if (strcmp(key, "CONNECTION_BACKLOG") == 0)
+            {
+                backlog = atoi(value);
+            }
+            else
+            {
+                fprintf(stderr, "Unknown configuration key: %s\n", key);
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 
     fclose(file);
 }
 
-int get_address_family() {
-    if (strcmp(address_family, "AF_INET") == 0) {
+int get_address_family()
+{
+    if (strcmp(address_family, "AF_INET") == 0)
+    {
         return AF_INET;
-    } else if (strcmp(address_family, "AF_INET6") == 0) {
+    }
+    else if (strcmp(address_family, "AF_INET6") == 0)
+    {
         return AF_INET6;
     }
 
@@ -49,14 +93,22 @@ int get_address_family() {
     exit(EXIT_FAILURE);
 }
 
-int get_socket_type() {
-    if (strcmp(socket_type, "SOCK_STREAM") == 0) {
+int get_socket_type()
+{
+    if (strcmp(socket_type, "SOCK_STREAM") == 0)
+    {
         return SOCK_STREAM;
-    } else if (strcmp(socket_type, "SOCK_DGRAM") == 0) {
+    }
+    else if (strcmp(socket_type, "SOCK_DGRAM") == 0)
+    {
         return SOCK_DGRAM;
-    }  else if (strcmp(socket_type, "SOCK_SEQPACKET") == 0) {
+    }
+    else if (strcmp(socket_type, "SOCK_SEQPACKET") == 0)
+    {
         return SOCK_SEQPACKET;
-    }  else if (strcmp(socket_type, "SOCK_RAW") == 0) {
+    }
+    else if (strcmp(socket_type, "SOCK_RAW") == 0)
+    {
         return SOCK_RAW;
     }
 
@@ -65,22 +117,29 @@ int get_socket_type() {
     exit(EXIT_FAILURE);
 }
 
-uint32_t get_domain() {
-    if (strcmp(domain, "INADDR_ANY") == 0) {
+uint32_t get_domain()
+{
+    if (strcmp(domain, "INADDR_ANY") == 0)
+    {
         return INADDR_ANY;
-    } else {
-        return (uint32_t)strtoul(domain, NULL, 10);     
+    }
+    else
+    {
+        return (uint32_t)strtoul(domain, NULL, 10);
     }
 }
 
-int get_protocol() {
+int get_protocol()
+{
     return protocol;
 }
 
-int get_port() {
+int get_port()
+{
     return port;
 }
 
-int get_backlog() {
+int get_backlog()
+{
     return backlog;
 }
