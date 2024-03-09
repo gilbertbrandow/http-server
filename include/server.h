@@ -14,18 +14,29 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+/**
+ * @struct server
+ * @brief Represents the server configuration and state.
+ */
 struct server
 {
-    int address_family;
-    int socket_type;
-    int protocol;
-    int port;
-    int backlog;
-    int socket;
+    int address_family;          /**< The address family (e.g., AF_INET). */
+    int socket_type;             /**< The socket type (e.g., SOCK_STREAM). */
+    int protocol;                /**< The protocol used by the socket. */
+    int port;                    /**< The port number on which the server listens. */
+    int backlog;                 /**< The maximum length of the queue of pending connections. */
+    int socket;                  /**< The server socket file descriptor. */
 
-    u_long interface;
-    struct sockaddr_in socketaddr_in;
+    u_long interface;            /**< The network interface for binding the socket. */
+    struct sockaddr_in socketaddr_in; /**< The sockaddr_in structure for socket configuration. */
 
+    /**
+     * @brief Launches the server.
+     *
+     * This function initializes and starts the server based on the provided configuration.
+     *
+     * @param server A pointer to the server structure.
+     */
     void (*launch)(struct server *server);
 };
 
