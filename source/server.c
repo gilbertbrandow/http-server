@@ -9,8 +9,6 @@
  **/
 
 #include <server.h>
-#include <router.h>
-#include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -61,13 +59,3 @@ struct server server_constructor(
 
     return server;
 };
-
-void launch(struct server *server) {
-    int address_length = sizeof(server->socketaddr_in);
-
-    while(1) {
-        printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
-        int client_socket = accept(server->socket, (struct sockaddr*)&server->socketaddr_in, (socklen_t *)&address_length);
-        handle_request(client_socket);
-    }
-}
