@@ -49,12 +49,7 @@ void handle_request(int client_socket)
  */
 void route(struct http_request *http_request, int client_socket)
 {
-
     write(client_socket, response, strlen(response));
-    printf("Method: %s\n", http_request->method);
-    printf("Path: %s\n", http_request->path);
-    printf("Version: %s\n", http_request->version);
-    printf("Host: %s\n", http_request->host);
     return;
 }
 
@@ -70,10 +65,35 @@ void route(struct http_request *http_request, int client_socket)
 struct http_request http_request_constructor(char *request_data)
 {
     struct http_request http_request;
+    char request_method_string[10];
 
     char *line = strtok(request_data, "\n");
 
-    sscanf(line, "%7s %99s %9s", http_request.method, http_request.path, http_request.version);
+    sscanf(line, "%7s %99s %9s", request_method_string, http_request.path, http_request.version);
+
+    if (strcmp(request_method_string, "GET") == 0)
+        http_request.method = GET;
+    else if (strcmp(request_method_string, "POST") == 0)
+        http_request.method = POST;
+    else if (strcmp(request_method_string, "PUT") == 0)
+        http_request.method = PUT;
+    else if (strcmp(request_method_string, "DELETE") == 0)
+        http_request.method = DELETE;
+    else if (strcmp(request_method_string, "PATCH") == 0)
+        http_request.method = PATCH;
+    else if (strcmp(request_method_string, "HEAD") == 0)
+        http_request.method = HEAD;
+    else if (strcmp(request_method_string, "OPTIONS") == 0)
+        http_request.method = OPTIONS;
+    else if (strcmp(request_method_string, "TRACE") == 0)
+        http_request.method = TRACE;
+    else if (strcmp(request_method_string, "CONNECT") == 0)
+        http_request.method = CONNECT;
+    else
+    {
+        fprintf(stderr, "Unallowed request method '%s'.\n", request_method_string);
+        exit(EXIT_FAILURE);
+    }
 
     while ((line = strtok(NULL, "\n")) != NULL)
     {

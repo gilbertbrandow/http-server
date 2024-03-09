@@ -17,12 +17,30 @@
 extern const char *response;
 
 /**
+ * @brief Enum representing HTTP request methods.
+ * 
+ * This enumeration defines symbolic constants for HTTP request methods.
+ *
+ */
+enum request_method {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    HEAD,
+    OPTIONS,
+    TRACE,
+    CONNECT
+};
+
+/**
  * @struct http_request
  * @brief Represents an HTTP request.
  */
 struct http_request
 {
-    char method[MAX_METHOD_SIZE];            /**< The HTTP request method (e.g., GET, POST). */
+    enum request_method method;              /**< The HTTP request method (e.g., GET, POST). */
     char path[100];                          /**< The requested path in the URL. */
     char version[10];                        /**< The HTTP protocol version (e.g., HTTP/1.1). */
     char host[100];                          /**< The value of the Host header. */
