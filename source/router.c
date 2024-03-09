@@ -14,25 +14,39 @@
 #include <unistd.h>
 #include <string.h>
 
+/**
+ * @brief Default HTTP response message.
+ */
 const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world?";
 
+/**
+ * @brief Handles an incoming HTTP request.
+ *
+ * This function reads the HTTP request from the client socket, constructs an
+ * HTTP request struct, and routes the request.
+ *
+ * @param client_socket The socket connected to the client.
+ */
 void handle_request(int client_socket)
 {
-    char buffer[MAX_BUFFER_SIZE];
-    
+    char request_data[MAX_REQUEST_SIZE];
     struct http_request http_request;
 
-    read(client_socket, buffer, 30000);
-
-    http_request = http_request_constructor(buffer);
-
+    read(client_socket, request_data, 30000);
+    http_request = http_request_constructor(request_data);
     route(&http_request, client_socket);
-
     close(client_socket);
-
-    return;
 }
 
+/**
+ * @brief Routes an HTTP request and sends a response to the client.
+ *
+ * This function takes an HTTP request struct, sends a predefined response,
+ * and prints some information about the request to the console.
+ *
+ * @param http_request Pointer to the HTTP request struct.
+ * @param client_socket The socket connected to the client.
+ */
 void route(struct http_request *http_request, int client_socket)
 {
 
@@ -44,11 +58,20 @@ void route(struct http_request *http_request, int client_socket)
     return;
 }
 
-struct http_request http_request_constructor(char *buffer)
+/**
+ * @brief Constructs an HTTP request struct from raw request data.
+ *
+ * This function parses the raw HTTP request data and populates an HTTP
+ * request struct with relevant information.
+ *
+ * @param request_data The raw HTTP request data.
+ * @return The constructed HTTP request struct.
+ */
+struct http_request http_request_constructor(char *request_data)
 {
     struct http_request http_request;
 
-    char *line = strtok(buffer, "\n");
+    char *line = strtok(request_data, "\n");
 
     sscanf(line, "%7s %99s %9s", http_request.method, http_request.path, http_request.version);
 
