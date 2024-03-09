@@ -15,9 +15,9 @@
 #include <string.h>
 
 /**
- * @brief Default HTTP response message.
+ * @brief 404 HTTP response message.
  */
-const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world?";
+const char *response_404 = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 103\r\n\r\n<html><head><title>404 Not Found</title></head><body><h1>Page not found</h1></body></html>";
 
 /**
  * @brief Handles an incoming HTTP request.
@@ -30,26 +30,50 @@ const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-L
 void handle_request(int client_socket)
 {
     char request_data[MAX_REQUEST_SIZE];
+
     struct http_request http_request;
 
-    read(client_socket, request_data, 30000);
+    read(client_socket, request_data, MAX_REQUEST_SIZE);
+
     http_request = http_request_constructor(request_data);
+
     route(&http_request, client_socket);
+
     close(client_socket);
 }
 
 /**
- * @brief Routes an HTTP request and sends a response to the client.
+ * @brief Routes an HTTP request and sends a response to the client based on predefined routes.
  *
- * This function takes an HTTP request struct, sends a predefined response,
- * and prints some information about the request to the console.
+ * This function iterates through an array of routes, matches the HTTP request's method and path
+ * to a route, and executes the corresponding action. If no matching route is found, a default
+ * "404 Not Found" response is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
  * @param client_socket The socket connected to the client.
  */
 void route(struct http_request *http_request, int client_socket)
 {
-    write(client_socket, response, strlen(response));
+    for (size_t i = 0; i < num_routes; ++i)
+    {
+        if (http_request->method == routes[i].method &&
+            strcmp(http_request->path, routes[i].url) == 0)
+        {
+
+            char *response = routes[i].action();
+
+            write(client_socket, response, strlen(response));
+
+            free(response);
+
+            printf("Connection served 200.\n");
+            return;
+        }
+    }
+
+    write(client_socket, response_404, strlen(response_404));
+    printf("Connection served 404\n");
+
     return;
 }
 
@@ -166,17 +190,28 @@ struct http_request http_request_constructor(char *request_data)
  * @return request_method The enum value representing the parsed HTTP request method.
  *         If the method is not recognized, returns an error value.
  */
-enum request_method parse_request_method(const char *method_string) {
-    if (strcmp(method_string, "GET") == 0) return GET;
-    else if (strcmp(method_string, "POST") == 0) return POST;
-    else if (strcmp(method_string, "PUT") == 0) return PUT;
-    else if (strcmp(method_string, "DELETE") == 0) return DELETE;
-    else if (strcmp(method_string, "PATCH") == 0) return PATCH;
-    else if (strcmp(method_string, "HEAD") == 0) return HEAD;
-    else if (strcmp(method_string, "OPTIONS") == 0) return OPTIONS;
-    else if (strcmp(method_string, "TRACE") == 0) return TRACE;
-    else if (strcmp(method_string, "CONNECT") == 0) return CONNECT;
-    else {
+enum request_method parse_request_method(const char *method_string)
+{
+    if (strcmp(method_string, "GET") == 0)
+        return GET;
+    else if (strcmp(method_string, "POST") == 0)
+        return POST;
+    else if (strcmp(method_string, "PUT") == 0)
+        return PUT;
+    else if (strcmp(method_string, "DELETE") == 0)
+        return DELETE;
+    else if (strcmp(method_string, "PATCH") == 0)
+        return PATCH;
+    else if (strcmp(method_string, "HEAD") == 0)
+        return HEAD;
+    else if (strcmp(method_string, "OPTIONS") == 0)
+        return OPTIONS;
+    else if (strcmp(method_string, "TRACE") == 0)
+        return TRACE;
+    else if (strcmp(method_string, "CONNECT") == 0)
+        return CONNECT;
+    else
+    {
         fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
         exit(EXIT_FAILURE);
     }
