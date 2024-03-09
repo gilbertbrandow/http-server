@@ -9,14 +9,17 @@
  */
 #ifndef ROUTER_H
 #define ROUTER_H
-#define BUFFER_MAX_LENGHT 3000
-#define MAX_METHOD_LENGTH 7
+#define MAX_BUFFER_SIZE 3000
+#define MAX_METHOD_SIZE 7
 
 #include <stdint.h>
 
+extern const char *response; 
+
+void handle_request(int client_socket);
 struct http_request
 {
-    char method[MAX_METHOD_LENGTH];
+    char method[MAX_METHOD_SIZE];
     char path[100];
     char host[100];
     char connection[20];

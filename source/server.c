@@ -8,7 +8,8 @@
  * (©) Copyright MIT License.
  **/
 
-#include "../include/server.h"
+#include <server.h>
+#include <router.h>
 #include <arpa/inet.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,17 +63,11 @@ struct server server_constructor(
 };
 
 void launch(struct server *server) {
-    char buffer[30000]; 
-    const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world!";
     int address_length = sizeof(server->socketaddr_in);
-    int new_socket; 
 
     while(1) {
         printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
-        new_socket = accept(server->socket, (struct sockaddr*)&server->socketaddr_in, (socklen_t *)&address_length);
-        read(new_socket, buffer, 30000);
-        printf("%s\n", buffer);
-        write(new_socket, response, strlen(response));
-        close(new_socket);
+        int client_socket = accept(server->socket, (struct sockaddr*)&server->socketaddr_in, (socklen_t *)&address_length);
+        handle_request(client_socket);
     }
 }
