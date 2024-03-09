@@ -17,12 +17,30 @@
 extern const char *response;
 
 /**
+ * @brief Enum representing HTTP request methods.
+ * 
+ * This enumeration defines symbolic constants for HTTP request methods.
+ *
+ */
+enum request_method {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    HEAD,
+    OPTIONS,
+    TRACE,
+    CONNECT
+};
+
+/**
  * @struct http_request
  * @brief Represents an HTTP request.
  */
 struct http_request
 {
-    char method[MAX_METHOD_SIZE];            /**< The HTTP request method (e.g., GET, POST). */
+    enum request_method method;              /**< The HTTP request method (e.g., GET, POST). */
     char path[100];                          /**< The requested path in the URL. */
     char version[10];                        /**< The HTTP protocol version (e.g., HTTP/1.1). */
     char host[100];                          /**< The value of the Host header. */
@@ -41,6 +59,18 @@ struct http_request
     char referer[100];                       /**< The value of the Referer header. */
     char cookie[100];                        /**< The value of the Cookie header. */
 };
+
+/**
+ * @brief Parses a string representation of an HTTP request method and returns the corresponding enum value.
+ *
+ * This function takes a string representation of an HTTP request method,
+ * compares it against known methods, and returns the corresponding enum value.
+ *
+ * @param method_string The string representation of the HTTP request method.
+ * @return request_method The enum value representing the parsed HTTP request method.
+ *         If the method is not recognized, returns an error value.
+ */
+enum request_method parse_request_method(const char *method_string);
 
 /**
  * @brief Constructs an HTTP request structure from a request_data.

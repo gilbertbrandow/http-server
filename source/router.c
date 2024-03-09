@@ -49,12 +49,7 @@ void handle_request(int client_socket)
  */
 void route(struct http_request *http_request, int client_socket)
 {
-
     write(client_socket, response, strlen(response));
-    printf("Method: %s\n", http_request->method);
-    printf("Path: %s\n", http_request->path);
-    printf("Version: %s\n", http_request->version);
-    printf("Host: %s\n", http_request->host);
     return;
 }
 
@@ -70,10 +65,13 @@ void route(struct http_request *http_request, int client_socket)
 struct http_request http_request_constructor(char *request_data)
 {
     struct http_request http_request;
+    char request_method_string[10];
 
     char *line = strtok(request_data, "\n");
 
-    sscanf(line, "%7s %99s %9s", http_request.method, http_request.path, http_request.version);
+    sscanf(line, "%7s %99s %9s", request_method_string, http_request.path, http_request.version);
+
+    http_request.method = parse_request_method(request_method_string);
 
     while ((line = strtok(NULL, "\n")) != NULL)
     {
@@ -156,4 +154,30 @@ struct http_request http_request_constructor(char *request_data)
     }
 
     return http_request;
+}
+
+/**
+ * @brief Parses a string representation of an HTTP request method and returns the corresponding enum value.
+ *
+ * This function takes a string representation of an HTTP request method,
+ * compares it against known methods, and returns the corresponding enum value.
+ *
+ * @param method_string The string representation of the HTTP request method.
+ * @return request_method The enum value representing the parsed HTTP request method.
+ *         If the method is not recognized, returns an error value.
+ */
+enum request_method parse_request_method(const char *method_string) {
+    if (strcmp(method_string, "GET") == 0) return GET;
+    else if (strcmp(method_string, "POST") == 0) return POST;
+    else if (strcmp(method_string, "PUT") == 0) return PUT;
+    else if (strcmp(method_string, "DELETE") == 0) return DELETE;
+    else if (strcmp(method_string, "PATCH") == 0) return PATCH;
+    else if (strcmp(method_string, "HEAD") == 0) return HEAD;
+    else if (strcmp(method_string, "OPTIONS") == 0) return OPTIONS;
+    else if (strcmp(method_string, "TRACE") == 0) return TRACE;
+    else if (strcmp(method_string, "CONNECT") == 0) return CONNECT;
+    else {
+        fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
+        exit(EXIT_FAILURE);
+    }
 }
