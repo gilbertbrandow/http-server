@@ -14,13 +14,38 @@
 #include <unistd.h>
 #include <string.h>
 
-const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world!";
+const char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 12\r\n\r\nHello world?";
 
 void handle_request(int client_socket)
 {
     char buffer[MAX_BUFFER_SIZE]; 
+    struct http_request http_request;
+
     read(client_socket, buffer, 30000);
-    printf("%s\n", buffer);
-    write(client_socket, response, strlen(response));
+    //printf("%s\n", buffer);
+    
+    http_request = http_request_constructor(buffer);
+
+    route(&http_request, client_socket);
+
     close(client_socket);
+
+    return;
+}
+
+void route(struct http_request *http_request, int client_socket) {
+
+    write(client_socket, response, strlen(response));
+    printf("Method: %s\n", http_request->method);
+    printf("Path: %s\n", http_request->path);
+    return;
+}
+
+struct http_request http_request_constructor(char *buffer)
+{
+    struct http_request http_request;
+
+    //TODO: read from the buffer
+
+    return http_request;
 }

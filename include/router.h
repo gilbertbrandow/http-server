@@ -14,9 +14,8 @@
 
 #include <stdint.h>
 
-extern const char *response; 
+extern const char *response;
 
-void handle_request(int client_socket);
 struct http_request
 {
     char method[MAX_METHOD_SIZE];
@@ -26,19 +25,23 @@ struct http_request
     char pragma[20];
     char cache_control[20];
     char user_agent[200];
-    char sec_ch_ua[200];
+    char sec_ch_ua[100];
     char sec_ch_ua_mobile[20];
     char sec_ch_ua_platform[20];
     char accept[200];
     char sec_fetch_site[20];
     char sec_fetch_mode[20];
     char sec_fetch_dest[20];
-    char referer[200];
+    char referer[100];
     char accept_encoding[100];
     char accept_language[100];
     char cookie[100];
 };
 
 struct http_request http_request_constructor(char *buffer);
+
+void handle_request(int client_socket);
+
+void route(struct http_request *http_request, int client_socket);
 
 #endif
