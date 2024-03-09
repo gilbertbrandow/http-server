@@ -22,7 +22,6 @@ void handle_request(int client_socket)
     struct http_request http_request;
 
     read(client_socket, buffer, 30000);
-    //printf("%s\n", buffer);
     
     http_request = http_request_constructor(buffer);
 
@@ -38,6 +37,7 @@ void route(struct http_request *http_request, int client_socket) {
     write(client_socket, response, strlen(response));
     printf("Method: %s\n", http_request->method);
     printf("Path: %s\n", http_request->path);
+    printf("Version: %s\n", http_request->version);
     return;
 }
 
@@ -45,7 +45,7 @@ struct http_request http_request_constructor(char *buffer)
 {
     struct http_request http_request;
 
-    //TODO: read from the buffer
+    sscanf(buffer, "%s %s %s", http_request.method, http_request.path, http_request.version);
 
     return http_request;
 }

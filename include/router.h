@@ -20,6 +20,7 @@ struct http_request
 {
     char method[MAX_METHOD_SIZE];
     char path[100];
+    char version[10];
     char host[100];
     char connection[20];
     char pragma[20];
