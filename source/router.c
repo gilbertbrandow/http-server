@@ -71,29 +71,7 @@ struct http_request http_request_constructor(char *request_data)
 
     sscanf(line, "%7s %99s %9s", request_method_string, http_request.path, http_request.version);
 
-    if (strcmp(request_method_string, "GET") == 0)
-        http_request.method = GET;
-    else if (strcmp(request_method_string, "POST") == 0)
-        http_request.method = POST;
-    else if (strcmp(request_method_string, "PUT") == 0)
-        http_request.method = PUT;
-    else if (strcmp(request_method_string, "DELETE") == 0)
-        http_request.method = DELETE;
-    else if (strcmp(request_method_string, "PATCH") == 0)
-        http_request.method = PATCH;
-    else if (strcmp(request_method_string, "HEAD") == 0)
-        http_request.method = HEAD;
-    else if (strcmp(request_method_string, "OPTIONS") == 0)
-        http_request.method = OPTIONS;
-    else if (strcmp(request_method_string, "TRACE") == 0)
-        http_request.method = TRACE;
-    else if (strcmp(request_method_string, "CONNECT") == 0)
-        http_request.method = CONNECT;
-    else
-    {
-        fprintf(stderr, "Unallowed request method '%s'.\n", request_method_string);
-        exit(EXIT_FAILURE);
-    }
+    http_request.method = parse_request_method(request_method_string);
 
     while ((line = strtok(NULL, "\n")) != NULL)
     {
@@ -176,4 +154,30 @@ struct http_request http_request_constructor(char *request_data)
     }
 
     return http_request;
+}
+
+/**
+ * @brief Parses a string representation of an HTTP request method and returns the corresponding enum value.
+ *
+ * This function takes a string representation of an HTTP request method,
+ * compares it against known methods, and returns the corresponding enum value.
+ *
+ * @param method_string The string representation of the HTTP request method.
+ * @return request_method The enum value representing the parsed HTTP request method.
+ *         If the method is not recognized, returns an error value.
+ */
+enum request_method parse_request_method(const char *method_string) {
+    if (strcmp(method_string, "GET") == 0) return GET;
+    else if (strcmp(method_string, "POST") == 0) return POST;
+    else if (strcmp(method_string, "PUT") == 0) return PUT;
+    else if (strcmp(method_string, "DELETE") == 0) return DELETE;
+    else if (strcmp(method_string, "PATCH") == 0) return PATCH;
+    else if (strcmp(method_string, "HEAD") == 0) return HEAD;
+    else if (strcmp(method_string, "OPTIONS") == 0) return OPTIONS;
+    else if (strcmp(method_string, "TRACE") == 0) return TRACE;
+    else if (strcmp(method_string, "CONNECT") == 0) return CONNECT;
+    else {
+        fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
+        exit(EXIT_FAILURE);
+    }
 }

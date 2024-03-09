@@ -61,6 +61,18 @@ struct http_request
 };
 
 /**
+ * @brief Parses a string representation of an HTTP request method and returns the corresponding enum value.
+ *
+ * This function takes a string representation of an HTTP request method,
+ * compares it against known methods, and returns the corresponding enum value.
+ *
+ * @param method_string The string representation of the HTTP request method.
+ * @return request_method The enum value representing the parsed HTTP request method.
+ *         If the method is not recognized, returns an error value.
+ */
+enum request_method parse_request_method(const char *method_string);
+
+/**
  * @brief Constructs an HTTP request structure from a request_data.
  *
  * This function parses the provided clear text request and initializes an HTTP request structure.
