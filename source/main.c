@@ -16,6 +16,12 @@
 #include <stdio.h>
 #include <arpa/inet.h>
 
+struct route routes[] = {
+    {GET, "/", index_action},
+};
+
+size_t num_routes = sizeof(routes) / sizeof(routes[0]);
+
 /**
  * @brief Launches the server and listens for incoming connections.
  *
