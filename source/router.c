@@ -17,7 +17,12 @@
 /**
  * @brief 404 HTTP response message.
  */
-const char *response_404 = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 103\r\n\r\n<html><head><title>404 Not Found</title></head><body><h1>Page not found</h1></body></html>";
+const char *response_404 = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\nContent-Length: 107\r\n\r\n<html><head><title>404 Not Found</title></head><body><h1>404 Page not found</h1></body></html>";
+
+/**
+ * @brief 500 HTTP response message.
+ */
+const char *response_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\nContent-Length: 119\r\n\r\n<html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>";
 
 /**
  * @brief Handles an incoming HTTP request.
@@ -47,7 +52,8 @@ void handle_request(int client_socket)
  *
  * This function iterates through an array of routes, matches the HTTP request's method and path
  * to a route, and executes the corresponding action. If no matching route is found, a default
- * "404 Not Found" response is sent to the client.
+ * "404 Not Found" response is sent to the client. If the response returned from the controller action
+ *  is null a default "500 Internal server error" is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
  * @param client_socket The socket connected to the client.
@@ -61,6 +67,12 @@ void route(struct http_request *http_request, int client_socket)
         {
 
             char *response = routes[i].action();
+
+            if(response == NULL) {
+                write(client_socket, response_500, strlen(response_500));
+                printf("Connection served 500 (Internal Server Error).\n");
+                return;
+            }
 
             write(client_socket, response, strlen(response));
 
