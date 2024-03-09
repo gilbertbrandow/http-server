@@ -23,19 +23,18 @@ struct http_request
     char version[10];
     char host[100];
     char connection[20];
-    char pragma[20];
+    char accept[200];
+    char accept_encoding[100];
+    char accept_language[100];
     char cache_control[20];
     char user_agent[200];
     char sec_ch_ua[100];
     char sec_ch_ua_mobile[20];
     char sec_ch_ua_platform[20];
-    char accept[200];
     char sec_fetch_site[20];
     char sec_fetch_mode[20];
     char sec_fetch_dest[20];
     char referer[100];
-    char accept_encoding[100];
-    char accept_language[100];
     char cookie[100];
 };
 
