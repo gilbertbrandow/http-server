@@ -11,6 +11,8 @@
 #ifndef CONFIG_LOADER_H
 #define CONFIG_LOADER_H
 
+#include <stdint.h>
+
 /**
  * @brief   Loads configuration variables from a specified file.
  * @param   filename The name of the configuration file.
