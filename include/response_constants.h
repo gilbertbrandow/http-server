@@ -8,7 +8,8 @@
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 10th of March 2024
  *
- * (©) Copyright MIT License.
+ * Copyright (c) 2024 Simon Gustafsson
+ * Released under the MIT License. See LICENSE file for details.
  */
 
 #ifndef RESPONSE_CONSTANTS_H
