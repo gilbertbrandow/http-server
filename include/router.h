@@ -12,6 +12,8 @@
 #define ROUTER_H
 
 #define MAX_REQUEST_SIZE 3000
+#define RESPONSE_SUCCESS 0     /**< Constant indicating successful response. */
+#define RESPONSE_ERROR -1      /**< Constant indicating an error in response handling. */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -74,7 +76,7 @@ struct http_request
  * @return A response constant indicating the outcome of the route action.
  * @note The caller is responsible for handling the response constant appropriately.
  */
-typedef int (*route_action)(int client_socket);
+typedef int (*route_action)(int client_socket, struct http_request *http_request);
 
 /**
  * @struct route
@@ -137,6 +139,22 @@ struct http_request http_request_constructor(char *request_data);
  * @param client_socket The file descriptor of the client socket.
  */
 void handle_request(int client_socket);
+
+/**
+ * @brief Checks whether a given path matches a specified route pattern.
+ *
+ * This function compares the given path against a route pattern, which may
+ * contain special characters. The special character '^' at the beginning of
+ * the pattern indicates that the path should start with the subsequent characters.
+ * If the pattern does not start with '^', the function checks if the path matches
+ * the pattern entirely.
+ *
+ * @param pattern The route pattern to match against.
+ * @param path The path to compare with the route pattern.
+ * @return 0 if the path matches the route pattern, otherwise a non-zero value.
+ * @note The comparison is case-sensitive.
+ */
+int is_route_matching(const char *pattern, const char *path);
 
 /**
  * @brief Routes the HTTP request to the appropriate handler.
