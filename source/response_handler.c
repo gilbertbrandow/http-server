@@ -62,6 +62,35 @@ int send_index_page(int client_socket)
     return ROUTER_SUCCESS;
 }
 
+int send_favicon(int client_socket)
+{
+    const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: image/x-icon\r\n\r\n";
+
+    size_t ico_size;
+    uint8_t *ico_content = read_binary_file("public/images/c-32x32.png", &ico_size);
+
+    if (ico_content == NULL)
+    {
+        return ROUTER_ERROR_WRITE;
+    }
+
+    if (write(client_socket, response_header, strlen(response_header)) == -1)
+    {
+        free(ico_content);
+        return ROUTER_ERROR_WRITE;
+    }
+
+    if (write(client_socket, ico_content, ico_size) == -1)
+    {
+        free(ico_content);
+        return ROUTER_ERROR_WRITE;
+    }
+
+    free(ico_content);
+
+    return ROUTER_SUCCESS;
+}
+
 /**
  * @brief Reads the content of a html file and returns it as a dynamically allocated string.
  *
@@ -104,6 +133,34 @@ char *read_html_file(const char *filename)
     size_t bytes_read = fread(content, 1, file_size, file);
 
     content[bytes_read] = '\0';
+
+    fclose(file);
+
+    return content;
+}
+
+uint8_t *read_binary_file(const char *filename, size_t *file_size)
+{
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+    {
+        fprintf(stderr, "Error opening file: %s\n", filename);
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    *file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    uint8_t *content = (uint8_t *)malloc(*file_size);
+    if (content == NULL)
+    {
+        fclose(file);
+        fprintf(stderr, "Memory allocation error\n");
+        return NULL;
+    }
+
+    size_t bytes_read = fread(content, 1, *file_size, file);
 
     fclose(file);
 

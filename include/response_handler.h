@@ -24,6 +24,8 @@
  */
 char *read_html_file(const char *filename); 
 
+uint8_t *read_binary_file(const char *filename, size_t *file_size);
+
 /**
  * @brief Generates the HTTP response for the index page.
  *
@@ -36,3 +38,5 @@ char *read_html_file(const char *filename);
  * @warning If any errors occur during file reading or memory allocation, NULL is returned.
  */
 int send_index_page(int client_socket);
+
+int send_favicon(int client_socket);
