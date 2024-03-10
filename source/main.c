@@ -77,6 +77,7 @@ int main()
         get_domain(),
         get_port(),
         get_backlog(),
+        get_reuseaddr_enabled(),
         launch);
 
     server.launch(&server);
