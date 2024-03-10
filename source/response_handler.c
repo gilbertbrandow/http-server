@@ -51,6 +51,40 @@ int send_frida_page(int client_socket, struct http_request *http_request)
 }
 
 /**
+ * @brief Generates the HTTP response for the Jean-Michel Basquiat page.
+ *
+ * This function reads the content of the 'public/html/jean.html' file and constructs
+ * an HTTP response containing the file content. The response includes the necessary
+ * headers for an HTML response.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
+int send_jean_page(int client_socket, struct http_request *http_request)
+{
+    return send_html_page(client_socket, "public/html/jean.html");
+}
+
+/**
+ * @brief Generates the HTTP response for the Vincent Van Gogh page.
+ *
+ * This function reads the content of the 'public/html/vincent.html' file and constructs
+ * an HTTP response containing the file content. The response includes the necessary
+ * headers for an HTML response.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
+int send_vincent_page(int client_socket, struct http_request *http_request)
+{
+    return send_html_page(client_socket, "public/html/vincent.html");
+}
+
+/**
  * @brief Sends an image in response to an HTTP request.
  *
  * This function processes an HTTP request for an image and sends the corresponding
