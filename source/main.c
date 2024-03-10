@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <unistd.h>
+#include <pthread.h>
 
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
@@ -60,6 +61,8 @@ void handle_shutdown(int signum);
  */
 void launch(struct server *server);
 
+void *handle_connection(void *client_socket_ptr);
+
 /**
  * @brief Main function for the server application.
  *
@@ -94,14 +97,29 @@ void launch(struct server *server)
 
     signal(SIGINT, handle_shutdown);
 
+    printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
     while (!shutdown_flag)
     {
-        printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
-        handle_request(client_socket);
+        
+        pthread_t thread;
+        if (pthread_create(&thread, NULL, handle_connection, (void *)&client_socket) != 0)
+        {
+            perror("Error creating thread");
+        }
+
+        pthread_detach(thread);
     }
 
     return;
+}
+
+void *handle_connection(void *client_socket_ptr)
+{
+    int client_socket = *((int *)client_socket_ptr);
+    handle_request(client_socket);
+    close(client_socket);
+    pthread_exit(NULL);
 }
 
 void handle_shutdown(int signum)
