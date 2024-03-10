@@ -5,7 +5,8 @@
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 9th of March 2024
  *
- * (©) Copyright MIT License.
+ * Copyright (c) 2024 Simon Gustafsson
+ * Released under the MIT License. See LICENSE file for details.
  */
 
 #include "response_handler.h"
