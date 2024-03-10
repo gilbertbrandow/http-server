@@ -65,7 +65,7 @@ void route(struct http_request *http_request, int client_socket)
     for (size_t i = 0; i < num_routes; ++i)
     {
         if (http_request->method == routes[i].method &&
-            strcmp(http_request->path, routes[i].url) == 0)
+            is_route_matching(routes[i].url, http_request->path) == 0)
         {
 
             if (routes[i].action(client_socket, http_request) != RESPONSE_SUCCESS)
@@ -223,5 +223,29 @@ enum request_method parse_request_method(const char *method_string)
     {
         fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
         exit(EXIT_FAILURE);
+    }
+}
+
+/**
+ * @brief Checks whether a given path matches a specified route pattern.
+ *
+ * This function compares the given path against a route pattern, which may
+ * contain special characters. The special character '^' at the beginning of
+ * the pattern indicates that the path should start with the subsequent characters.
+ * If the pattern does not start with '^', the function checks if the path matches
+ * the pattern entirely.
+ *
+ * @param pattern The route pattern to match against.
+ * @param path The path to compare with the route pattern.
+ * @return 0 if the path matches the route pattern, otherwise a non-zero value.
+ * @note The comparison is case-sensitive.
+ */
+int is_route_matching(const char *pattern, const char *path) {
+    if (pattern[0] == '^') {
+        pattern++;
+
+        return strncmp(pattern, path, strlen(pattern));
+    } else {
+        return strcmp(pattern, path);
     }
 }

@@ -141,6 +141,22 @@ struct http_request http_request_constructor(char *request_data);
 void handle_request(int client_socket);
 
 /**
+ * @brief Checks whether a given path matches a specified route pattern.
+ *
+ * This function compares the given path against a route pattern, which may
+ * contain special characters. The special character '^' at the beginning of
+ * the pattern indicates that the path should start with the subsequent characters.
+ * If the pattern does not start with '^', the function checks if the path matches
+ * the pattern entirely.
+ *
+ * @param pattern The route pattern to match against.
+ * @param path The path to compare with the route pattern.
+ * @return 0 if the path matches the route pattern, otherwise a non-zero value.
+ * @note The comparison is case-sensitive.
+ */
+int is_route_matching(const char *pattern, const char *path);
+
+/**
  * @brief Routes the HTTP request to the appropriate handler.
  *
  * This function takes an HTTP request structure, determines the appropriate action based on the
