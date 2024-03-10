@@ -1,5 +1,5 @@
 /**
- * @file controller.c
+ * @file response_handler.c
  * @brief
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
@@ -8,7 +8,7 @@
  * (©) Copyright MIT License.
  */
 
-#include <controller.h>
+#include <response_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,7 +29,7 @@
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, NULL is returned.
  */
-int index_action(int client_socket)
+int send_index_page(int client_socket)
 {
     const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 
