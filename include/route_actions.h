@@ -1,6 +1,6 @@
 /**
- * @file response_handler.h
- * @brief Declarations for functions related to handling HTTP responses.
+ * @file route_actions.h
+ * @brief Declarations for functions related to route actions.
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 9th of March 2024
@@ -9,8 +9,8 @@
  * Released under the MIT License. See LICENSE file for details.
  */
 
-#ifndef RESPONSE_HANDLER_H
-#define RESPONSE_HANDLER_H
+#ifndef ROUTE_ACTIONS.H
+#define ROUTE_ACTIONS.H
 
 #include "router.h"
 
@@ -148,4 +148,4 @@ int send_jean_page(int client_socket, struct http_request *http_request);
  */
 int send_vincent_page(int client_socket, struct http_request *http_request);
 
-#endif // RESPONSE_HANDLER_H
+#endif // ROUTE_ACTIONS.H

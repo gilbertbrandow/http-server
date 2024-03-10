@@ -1,6 +1,6 @@
 /**
- * @file response_handler.c
- * @brief Implementation of HTTP response handling functions.
+ * @file route_actions.c
+ * @brief Implementation of HTTP route actions functions.
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 9th of March 2024
@@ -9,7 +9,7 @@
  * Released under the MIT License. See LICENSE file for details.
  */
 
-#include "response_handler.h"
+#include "route_actions.h"
 
 #include <stdlib.h>
 #include <stdio.h>

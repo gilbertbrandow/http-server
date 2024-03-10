@@ -12,7 +12,7 @@
 #include "configuration_loader.h"
 #include "server.h"
 #include "router.h"
-#include "response_handler.h"
+#include "route_actions.h"
 
 #include <stdlib.h>
 #include <stdio.h>

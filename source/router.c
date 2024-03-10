@@ -54,7 +54,7 @@ void handle_request(int client_socket)
  *
  * This function iterates through an array of routes, matches the HTTP request's method and path
  * to a route, and executes the corresponding action. If no matching route is found, a default
- * "404 Not Found" response is sent to the client. If the response_handler action returns an error
+ * "404 Not Found" response is sent to the client. If the route action returns an error
  * a default "500 Internal server error" is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
