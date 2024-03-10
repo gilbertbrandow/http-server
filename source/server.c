@@ -1,7 +1,7 @@
 /**
  * @file server.c
  * @brief Contains the implementation of server_constructor - & launch functions.
- * 
+ *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 2nd of March 2024
  *
@@ -23,6 +23,7 @@ struct server server_constructor(
     u_long interface,
     int port,
     int backlog,
+    bool reuseaddr_enabled,
     void (*launch)(struct server *server))
 {
     struct server server;
@@ -38,6 +39,14 @@ struct server server_constructor(
     server.socketaddr_in.sin_addr.s_addr = htonl(interface);
 
     server.socket = socket(address_family, socket_type, protocol);
+
+    if (reuseaddr_enabled)
+    {
+        printf("Reuse enabled\n");
+        int sockfd;
+        int option = 1;
+        setsockopt(server.socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+    }
 
     if (server.socket == -1)
     {
