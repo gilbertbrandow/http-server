@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <signal.h>
 #include <unistd.h>
+#include <pthread.h>
 
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
@@ -50,15 +51,26 @@ size_t num_routes = sizeof(routes) / sizeof(routes[0]);
 void handle_shutdown(int signum);
 
 /**
- * @brief Launches the server and listens for incoming connections.
+ * @brief Launches the server, listens for incoming connections, and handles them in separate threads.
  *
- * This function sets up a server to listen for incoming connections on the specified domain and port.
- * It continuously accepts incoming connections, reads data from the client, sends a predefined response,
- * and then closes the connection.
+ * This function listens for incoming connections on domain and port specified on the server struct passed as an argument.
+ * It continuously accepts incoming connections, creates a new thread to handle each connection,
+ * and then closes the connection. The handling of each connection is delegated to the handle_connection function.
  *
  * @param server A pointer to the server structure containing server configuration and state.
  */
 void launch(struct server *server);
+
+/**
+ * @brief Handles a single client connection in a separate thread.
+ *
+ * This function is the entry point for a new thread created to handle an incoming client connection.
+ * It calls the handle_request function to process the client's request and then closes the connection.
+ *
+ * @param client_socket_ptr A pointer to the client socket descriptor.
+ * @return A pointer to the thread exit status (always NULL in this case).
+ */
+void *handle_connection(void *client_socket_ptr);
 
 /**
  * @brief Main function for the server application.
@@ -94,14 +106,30 @@ void launch(struct server *server)
 
     signal(SIGINT, handle_shutdown);
 
+    printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
     while (!shutdown_flag)
     {
-        printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
-        handle_request(client_socket);
+
+        pthread_t thread;
+        
+        if (pthread_create(&thread, NULL, handle_connection, (void *)&client_socket) != 0)
+        {
+            perror("Error creating thread");
+        }
+
+        pthread_detach(thread);
     }
 
     return;
+}
+
+void *handle_connection(void *client_socket_ptr)
+{
+    int client_socket = *((int *)client_socket_ptr);
+    handle_request(client_socket);
+    close(client_socket);
+    pthread_exit(NULL);
 }
 
 void handle_shutdown(int signum)
