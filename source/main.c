@@ -21,6 +21,7 @@
 struct route routes[] = {
     {GET, "/", send_index_page},
     {GET, "/favicon.ico", send_favicon},
+    {GET, "/frida-kahlo", send_frida_page},
 };
 
 size_t num_routes = sizeof(routes) / sizeof(routes[0]);
