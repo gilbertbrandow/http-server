@@ -9,6 +9,8 @@
  */
 
 #include <router.h>
+#include <response_constants.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -66,7 +68,7 @@ void route(struct http_request *http_request, int client_socket)
             strcmp(http_request->path, routes[i].url) == 0)
         {
 
-            if (routes[i].action(client_socket) != 0)
+            if (routes[i].action(client_socket) != RESPONSE_SUCCESS)
             {
                 write(client_socket, response_500, strlen(response_500));
                 printf("Connection served 500 (Internal Server Error).\n");
