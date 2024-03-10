@@ -12,6 +12,8 @@
 #ifndef RESPONSE_HANDLER_H
 #define RESPONSE_HANDLER_H
 
+#include "router.h"
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -103,6 +105,20 @@ int send_index_page(int client_socket, struct http_request *http_request);
  */
 int send_frida_page(int client_socket, struct http_request *http_request);
 
+/**
+ * @brief Sends an image in response to an HTTP request.
+ *
+ * This function processes an HTTP request for an image and sends the corresponding
+ * image content as the HTTP response. It removes the first character from the
+ * request path, assuming it is a '^', and then calls the send_binary_data function
+ * to send the image data with the appropriate content type.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @param http_request Pointer to the HTTP request structure.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing any allocated memory in case of an error.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
 int send_image(int client_socket, struct http_request *http_request);
 
 #endif // RESPONSE_HANDLER_H

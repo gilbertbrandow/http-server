@@ -10,7 +10,6 @@
  */
 
 #include "response_handler.h"
-#include "router.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -51,10 +50,24 @@ int send_frida_page(int client_socket, struct http_request *http_request)
     return send_html_page(client_socket, "public/html/frida.html");
 }
 
+/**
+ * @brief Sends an image in response to an HTTP request.
+ *
+ * This function processes an HTTP request for an image and sends the corresponding
+ * image content as the HTTP response. It removes the first character from the
+ * request path, assuming it is a '^', and then calls the send_binary_data function
+ * to send the image data with the appropriate content type.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @param http_request Pointer to the HTTP request structure.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing any allocated memory in case of an error.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
 int send_image(int client_socket, struct http_request *http_request)
 {
-    //How can I know whuch content type the response should be sent with?
-    return send_binary_data(client_socket, "image/jpeg", http_request->path);
+    memmove(http_request->path, http_request->path + 1, strlen(http_request->path));
+    return send_binary_data(client_socket, "image", http_request->path);
 }
 
 /**
