@@ -1,6 +1,6 @@
 /**
  * @file response_handler.c
- * @brief
+ * @brief Implementation of HTTP response handling functions.
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 9th of March 2024
@@ -9,14 +9,12 @@
  */
 
 #include <response_handler.h>
+#include <response_constants.h>
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
-
-#define ROUTER_SUCCESS 0
-#define ROUTER_ERROR_WRITE -1
-#define ROUTER_ERROR_OTHER -2
 
 /**
  * @brief Generates the HTTP response for the index page.
@@ -25,9 +23,10 @@
  * an HTTP response containing the file content. The response includes the necessary
  * headers for an HTML response.
  *
- * @return A dynamically allocated string representing the complete HTTP response.
+ * @param client_socket The client socket to write the response to.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
  * @note The caller is responsible for freeing the allocated memory.
- * @warning If any errors occur during file reading or memory allocation, NULL is returned.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
 int send_index_page(int client_socket)
 {
@@ -36,14 +35,14 @@ int send_index_page(int client_socket)
     char *response_body = read_html_file("public/html/index.html");
 
     if (response_body == NULL)
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
 
     char *response = malloc(strlen(response_header) + strlen(response_body) + 1);
 
     if (response == NULL)
     {
         free(response_body);
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
     }
 
     strcpy(response, response_header);
@@ -53,52 +52,64 @@ int send_index_page(int client_socket)
         perror("Error writing to client");
         free(response);
         free(response_body);
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
     }
     
     free(response);
     free(response_body);
 
-    return ROUTER_SUCCESS;
+    return RESPONSE_SUCCESS;
 }
 
+/**
+ * @brief Sends the favicon.ico file as a binary response to the client.
+ *
+ * This function constructs an HTTP response header and sends the binary content
+ * of the 'public/images/favicon.ico' file to the client. The response includes
+ * the necessary headers for an icon response.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
 int send_favicon(int client_socket)
 {
     const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: image/x-icon\r\n\r\n";
 
     size_t ico_size;
-    uint8_t *ico_content = read_binary_file("public/images/c-32x32.png", &ico_size);
+    uint8_t *ico_content = read_binary_file("public/images/favicon.ico", &ico_size);
 
     if (ico_content == NULL)
     {
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
     }
 
     if (write(client_socket, response_header, strlen(response_header)) == -1)
     {
         free(ico_content);
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
     }
 
     if (write(client_socket, ico_content, ico_size) == -1)
     {
         free(ico_content);
-        return ROUTER_ERROR_WRITE;
+        return RESPONSE_ERROR;
     }
 
     free(ico_content);
 
-    return ROUTER_SUCCESS;
+    return RESPONSE_SUCCESS;
 }
 
 /**
- * @brief Reads the content of a html file and returns it as a dynamically allocated string.
+ * @brief Reads the content of an HTML file and returns it as a dynamically allocated string.
  *
  * This function opens the specified file, reads its content, and returns the content
  * as a dynamically allocated string. The caller is responsible for freeing the allocated memory.
  *
  * @param filename The name of the file to be read.
- * @return A dynamically allocated string containing the file content.
+ * @return A dynamically allocated string containing the file content, or NULL on error.
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file opening, reading, or memory allocation, NULL is returned.
  */
@@ -139,6 +150,18 @@ char *read_html_file(const char *filename)
     return content;
 }
 
+/**
+ * @brief Reads the content of a binary file and returns it as a dynamically allocated uint8_t array.
+ *
+ * This function opens the specified file, reads its content, and returns the content
+ * as a dynamically allocated uint8_t array. The caller is responsible for freeing the allocated memory.
+ *
+ * @param filename The name of the file to be read.
+ * @param file_size A pointer to a size_t variable to store the size of the file.
+ * @return A dynamically allocated uint8_t array containing the file content, or NULL on error.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file opening, reading, or memory allocation, NULL is returned.
+ */
 uint8_t *read_binary_file(const char *filename, size_t *file_size)
 {
     FILE *file = fopen(filename, "rb");
