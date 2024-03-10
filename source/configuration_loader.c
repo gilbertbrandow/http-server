@@ -56,6 +56,10 @@ void load_configuration_variables(const char *filename)
             {
                 snprintf(domain, sizeof(domain), "%s", value);
             }
+            else if (strcmp(key, "SO_REUSEADDR_ENABLED") == 0)
+            {
+                snprintf(reuseaddr_enabled, sizeof(reuseaddr_enabled), "%s", value);
+            }
             else if (strcmp(key, "PROTOCOL") == 0)
             {
                 protocol = atoi(value);
@@ -144,4 +148,20 @@ int get_port()
 int get_backlog()
 {
     return backlog;
+}
+
+bool get_reuseaddr_enabled()
+{
+    if (strcmp(reuseaddr_enabled, "true") == 0)
+    {
+        return true;
+    }
+    else if (strcmp(reuseaddr_enabled, "false") == 0)
+    {
+        return false;
+    }
+
+    perror("Error reading the SO_REUSEADDR_ENABLED variable");
+    fprintf(stderr, "The value '%s' defined for SO_REUSEADDR_ENABLED is not a valid value, can only be 'true' or 'false'.\n", reuseaddr_enabled);
+    exit(EXIT_FAILURE);
 }

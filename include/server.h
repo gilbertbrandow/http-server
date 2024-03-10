@@ -14,6 +14,8 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <stdbool.h>
+
 
 /**
  * @struct server
@@ -28,7 +30,7 @@ struct server
     int backlog;                 /**< The maximum length of the queue of pending connections. */
     int socket;                  /**< The server socket file descriptor. */
 
-    u_long interface;            /**< The network interface for binding the socket. */
+    u_long interface;                 /**< The network interface for binding the socket. */
     struct sockaddr_in socketaddr_in; /**< The sockaddr_in structure for socket configuration. */
 
     /**
@@ -50,6 +52,7 @@ struct server
  * @param interface            The interface address to bind to (e.g INADDR_ANY for any available interface).
  * @param port                 The port number to bind the server to.
  * @param backlog              The maximum length of the queue of pending connections.
+ * @param reuseaddr_enabled    Bool value to determine if the address should be reusable immiedetly after shutdown
  * @param launch               Pointer to the function that will be called when the server is launched.
  *
  * @return struct server instance representing the configured server.
@@ -61,6 +64,7 @@ struct server server_constructor(
     u_long interface,
     int port,
     int backlog,
+    bool reuseaddr_enabled,
     void (*launch)(struct server *server));
 
 /**
