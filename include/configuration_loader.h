@@ -13,6 +13,7 @@
 #define CONFIG_LOADER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 /**
  * @brief   Loads configuration variables from a specified file.
@@ -58,6 +59,12 @@ static int port;
 static int backlog;
 
 /**
+ * @var     reuseaddr_enabled
+ * @brief   Holds the status of the SO_REUSEADDR socket option.
+ */
+static char reuseaddr_enabled[6];
+
+/**
  * @brief   Loads configuration variables from a specified file.
  * @param   filename The name of the configuration file.
  * @note    Exits the program with an error message if the file cannot be opened.
@@ -101,5 +108,11 @@ int get_port();
  * @return  The backlog value.
  */
 int get_backlog();
+
+/**
+ * @brief   Retrieves the status of the SO_REUSEADDR socket option based on the loaded configuration.
+ * @return  The status of the SO_REUSEADDR socket option (true if enabled, false if disabled).
+ */
+bool get_reuseaddr_enabled();
 
 #endif
