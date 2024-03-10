@@ -174,13 +174,15 @@ int send_vincent_page(int client_socket, struct http_request *http_request);
 /**
  * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
  *
- * This function extracts name and comment data from the JSON body of a POST request,
- * and then appends the information to a file named "comments.txt" in the "data" directory.
+ * This function checks the Content-Type of the HTTP request to ensure it is "application/json".
+ * If the content type is correct, the function extracts name and comment data from the JSON body
+ * of a POST request and appends the information to a file named "comments.txt" in the "data" directory.
  *
  * @param client_socket The socket descriptor for the client connection.
  * @param http_request Pointer to the HTTP request structure containing the request data.
  *
- * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure, 415 if the Content-Type is unsupported,
+ * or 400 if either "name" or "comment" is not found in the request body.
  *
  * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
  * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.

@@ -107,13 +107,15 @@ int send_image(int client_socket, struct http_request *http_request)
 /**
  * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
  *
- * This function extracts name and comment data from the JSON body of a POST request,
- * and then appends the information to a file named "comments.txt" in the "data" directory.
+ * This function checks the Content-Type of the HTTP request to ensure it is "application/json".
+ * If the content type is correct, the function extracts name and comment data from the JSON body
+ * of a POST request and appends the information to a file named "comments.txt" in the "data" directory.
  *
  * @param client_socket The socket descriptor for the client connection.
  * @param http_request Pointer to the HTTP request structure containing the request data.
  *
- * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure, 415 if the Content-Type is unsupported,
+ * or 400 if either "name" or "comment" is not found in the request body.
  *
  * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
  * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.
@@ -123,6 +125,12 @@ int send_image(int client_socket, struct http_request *http_request)
  */
 int create_comment(int client_socket, struct http_request *http_request)
 {
+    if (strcmp("application/json", http_request->content_type) != 0)
+    {
+        const char *json_response = "{\"status\": \"error\", \"message\": \"Unsupported Media Type\"}";
+        return send_json_response(client_socket, json_response, 415, "Unsupported Media Type");
+    }
+
     const char *ptr = http_request->body;
 
     int next_line_is_name = 0;
@@ -169,6 +177,12 @@ int create_comment(int client_socket, struct http_request *http_request)
         ptr = end_ptr + 1;
     }
 
+    if (name[0] == '\0' || comment[0] == '\0')
+    {
+        const char *json_response = "{\"status\": \"error\", \"message\": \"Bad Request: 'name' and 'comment' cannot be empty\"}";
+        return send_json_response(client_socket, json_response, 400, "Bad Request");
+    }
+
     FILE *file = fopen("data/comments.txt", "a");
 
     if (file == NULL)
@@ -177,8 +191,10 @@ int create_comment(int client_socket, struct http_request *http_request)
         return RESPONSE_ERROR;
     }
 
+    fprintf(file, "------------------------------\n");
     fprintf(file, "Name: %s\n", name);
-    fprintf(file, "Comment: %s\n\n", comment);
+    fprintf(file, "Comment: %s\n", comment);
+    fprintf(file, "------------------------------\n");
 
     fclose(file);
 
