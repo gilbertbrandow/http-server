@@ -12,7 +12,7 @@
 #include "configuration_loader.h"
 #include "server.h"
 #include "router.h"
-#include "response_handler.h"
+#include "route_actions.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,7 +24,7 @@ volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
 
 /**
- * @brief Array of routes to define the server's behavior.
+ * @brief Array of routes as availabled endpoints.
  */
 struct route routes[] = {
     {GET, "/", send_index_page},
@@ -32,6 +32,7 @@ struct route routes[] = {
     {GET, "/jean-michel-basquiat", send_jean_page},
     {GET, "/vincent-van-gogh", send_vincent_page},
     {GET, "^/public/images/", send_image},
+    {POST, "/comments", create_comment},
 };
 
 /**

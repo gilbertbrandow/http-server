@@ -1,3 +1,5 @@
 .vscode
 source/bin
 .env
+data/*
+!data/.gitkeep

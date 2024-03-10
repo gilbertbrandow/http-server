@@ -11,7 +11,7 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
-#define MAX_REQUEST_SIZE 3000
+#define MAX_REQUEST_BODY_LENGTH 4096
 #define RESPONSE_SUCCESS 0     /**< Constant indicating successful response. */
 #define RESPONSE_ERROR -1      /**< Constant indicating an error in response handling. */
 
@@ -52,6 +52,7 @@ struct http_request
     char accept[200];                        /**< The value of the Accept header. */
     char accept_encoding[100];               /**< The value of the Accept-Encoding header. */
     char accept_language[100];               /**< The value of the Accept-Language header. */
+    char content_type[200];                  /**< The value of the Content-Type header. */
     char cache_control[20];                  /**< The value of the Cache-Control header. */
     char user_agent[200];                    /**< The value of the User-Agent header. */
     char sec_ch_ua[100];                     /**< The value of the Sec-CH-UA header. */
@@ -62,6 +63,7 @@ struct http_request
     char sec_fetch_dest[20];                 /**< The value of the Sec-Fetch-Dest header. */
     char referer[100];                       /**< The value of the Referer header. */
     char cookie[100];                        /**< The value of the Cookie header. */
+    char body[MAX_REQUEST_BODY_LENGTH];
 };
 
 /**

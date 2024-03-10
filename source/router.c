@@ -36,11 +36,11 @@ const char *response_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: 
  */
 void handle_request(int client_socket)
 {
-    char request_data[MAX_REQUEST_SIZE];
+    char request_data[sizeof(struct http_request)];
 
     struct http_request http_request;
 
-    read(client_socket, request_data, MAX_REQUEST_SIZE);
+    read(client_socket, request_data, sizeof(struct http_request));
 
     http_request = http_request_constructor(request_data);
 
@@ -54,7 +54,7 @@ void handle_request(int client_socket)
  *
  * This function iterates through an array of routes, matches the HTTP request's method and path
  * to a route, and executes the corresponding action. If no matching route is found, a default
- * "404 Not Found" response is sent to the client. If the response_handler action returns an error
+ * "404 Not Found" response is sent to the client. If the route action returns an error
  * a default "500 Internal server error" is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
@@ -75,7 +75,7 @@ void route(struct http_request *http_request, int client_socket)
                 return;
             }
 
-            printf("Connection served 200.\n");
+            printf("Connection served successfully.\n");
             return;
         }
     }
@@ -106,12 +106,25 @@ struct http_request http_request_constructor(char *request_data)
 
     http_request.method = parse_request_method(request_method_string);
 
+    http_request.body[0] = '\0';
+    int reading_body = 0;
+
     while ((line = strtok(NULL, "\n")) != NULL)
     {
         char key[50];
         char value[200];
 
-        if (sscanf(line, "%49[^:]:%199s", key, value) == 2)
+        if (line[0] == '\r' || line[0] == '\n' || (line[0] == '\r' && line[1] == '\n'))
+        {
+            reading_body = 1;
+            continue;
+        }
+
+        if (reading_body)
+        {
+            strcat(http_request.body, line);
+        }
+        else if (sscanf(line, "%49[^:]:%199s", key, value) == 2)
         {
             if (strcmp(key, "Host") == 0)
             {
@@ -183,6 +196,11 @@ struct http_request http_request_constructor(char *request_data)
                 strncpy(http_request.cookie, value, sizeof(http_request.cookie) - 1);
                 http_request.cookie[sizeof(http_request.cookie) - 1] = '\0';
             }
+            else if (strcmp(key, "Content-Type") == 0)
+            {
+                strncpy(http_request.content_type, value, sizeof(http_request.content_type) - 1);
+                http_request.content_type[sizeof(http_request.content_type) - 1] = '\0';
+            }
         }
     }
 
@@ -240,12 +258,16 @@ enum request_method parse_request_method(const char *method_string)
  * @return 0 if the path matches the route pattern, otherwise a non-zero value.
  * @note The comparison is case-sensitive.
  */
-int is_route_matching(const char *pattern, const char *path) {
-    if (pattern[0] == '^') {
+int is_route_matching(const char *pattern, const char *path)
+{
+    if (pattern[0] == '^')
+    {
         pattern++;
 
         return strncmp(pattern, path, strlen(pattern));
-    } else {
+    }
+    else
+    {
         return strcmp(pattern, path);
     }
 }

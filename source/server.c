@@ -42,7 +42,6 @@ struct server server_constructor(
 
     if (reuseaddr_enabled)
     {
-        printf("Reuse enabled\n");
         int sockfd;
         int option = 1;
         setsockopt(server.socket, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
