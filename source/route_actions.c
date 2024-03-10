@@ -105,42 +105,121 @@ int send_image(int client_socket, struct http_request *http_request)
 }
 
 /**
- * @brief Creates a comment and sends a JSON response to the client.
+ * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
  *
- * This function is responsible for creating a comment and sending a JSON response
- * indicating the status and a message to the client.
+ * This function extracts name and comment data from the JSON body of a POST request,
+ * and then appends the information to a file named "comments.txt" in the "data" directory.
  *
- * @param client_socket The client socket to send the JSON response to.
- * @param http_request  The HTTP request data (not used in this example).
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ * @param client_socket The socket descriptor for the client connection.
+ * @param http_request Pointer to the HTTP request structure containing the request data.
+ *
+ * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ *
+ * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
+ * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.
+ * @note The file is opened in "a" (append) mode, and proper error handling is in place.
+ * @note Ensure that the "data" directory exists, and the process has write permissions to it.
+ * @note The caller is responsible for sending an appropriate JSON response to the client.
  */
 int create_comment(int client_socket, struct http_request *http_request)
 {
+    const char *ptr = http_request->body;
+
+    int next_line_is_name = 0;
+    int next_line_is_comment = 0;
+    char name[200];
+    char comment[200];
+
+    while (*ptr != '\0')
+    {
+        ptr = strchr(ptr, '\"');
+        if (ptr == NULL)
+        {
+            break;
+        }
+
+        ptr++;
+
+        const char *end_ptr = strchr(ptr, '\"');
+
+        if (end_ptr == NULL)
+        {
+            end_ptr = strchr(ptr, '\0');
+        }
+
+        if (strncmp(ptr, "name", end_ptr - ptr) == 0)
+        {
+            next_line_is_name = 1;
+        }
+        else if (strncmp(ptr, "comment", end_ptr - ptr) == 0)
+        {
+            next_line_is_comment = 1;
+        }
+        else if (next_line_is_name)
+        {
+            next_line_is_name = 0;
+            snprintf(name, sizeof(name), "%.*s", (int)(end_ptr - ptr), ptr);
+        }
+        else if (next_line_is_comment)
+        {
+            next_line_is_comment = 0;
+            snprintf(comment, sizeof(comment), "%.*s", (int)(end_ptr - ptr), ptr);
+        }
+
+        ptr = end_ptr + 1;
+    }
+
+    FILE *file = fopen("data/comments.txt", "a");
+
+    if (file == NULL)
+    {
+        perror("Error opening file 'comments.txt'");
+        return RESPONSE_ERROR;
+    }
+
+    fprintf(file, "Name: %s\n", name);
+    fprintf(file, "Comment: %s\n\n", comment);
+
+    fclose(file);
+
     const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
-    return send_json_response(client_socket, json_response);
+    return send_json_response(client_socket, json_response, 201, "Created");
 }
 
 /**
- * @brief Sends a JSON response to the client.
+ * @brief Sends a JSON response to a client over a socket.
  *
- * This function constructs a JSON response with a predefined header and the provided JSON content.
- * It sends the response to the specified client socket.
+ * This function constructs and sends an HTTP response with a JSON body to the client.
  *
- * @param client_socket The client socket to send the JSON response to.
- * @param json The JSON content to include in the response.
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ * @param client_socket The socket descriptor for the client connection.
+ * @param json The JSON string to be included in the response body.
+ * @param status_code The HTTP status code to be included in the response header.
+ * @param status_phrase The HTTP status phrase corresponding to the status code.
+ *
+ * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ *
+ * @note The caller is responsible for freeing any resources associated with the response.
+ * @note The function handles memory allocation for the response string, and the caller should
+ *       free the allocated memory after using the response.
+ * @note Ensure that the provided JSON string and status_phrase are valid pointers.
+ * @note The response format includes the HTTP/1.1 version, status code, status phrase,
+ *       and content type (application/json) in the response header.
+ * @note The response body is the provided JSON string.
+ * @note This function takes care to avoid null character issues by using proper string handling.
  */
-int send_json_response(int client_socket, const char *json)
+int send_json_response(int client_socket, const char *json, int status_code, const char *status_phrase)
 {
-    const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+    const char *response_format = "HTTP/1.1 %d %s\r\nContent-Type: application/json\r\n\r\n";
 
-    if (json == NULL)
+    if (json == NULL || status_phrase == NULL)
     {
         return RESPONSE_ERROR;
     }
 
-    size_t response_length = strlen(response_header) + strlen(json);
-    char *response = malloc(response_length + 1);
+    size_t header_length = snprintf(NULL, 0, response_format, status_code, status_phrase);
+    size_t response_length = header_length + strlen(json) + 1;
+
+    char *response = malloc(response_length);
 
     if (response == NULL)
     {
@@ -148,9 +227,12 @@ int send_json_response(int client_socket, const char *json)
         return RESPONSE_ERROR;
     }
 
-    sprintf(response, "%s%s", response_header, json);
+    // Create the response string
+    snprintf(response, header_length + 1, response_format, status_code, status_phrase);
+    strncat(response, json, response_length - header_length - 1); // Use strncat with proper size
 
-    if (write(client_socket, response, response_length) < 0)
+    // Write the response to the client socket
+    if (write(client_socket, response, response_length - 1) < 0)
     {
         perror("Error writing to client");
         free(response);

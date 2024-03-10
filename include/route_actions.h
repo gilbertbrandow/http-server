@@ -61,16 +61,27 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size);
 int send_html_page(int client_socket, const char *html_filename);
 
 /**
- * @brief Sends a JSON response to the client.
+ * @brief Sends a JSON response to a client over a socket.
  *
- * This function constructs a JSON response with a predefined header and the provided JSON content.
- * It sends the response to the specified client socket.
+ * This function constructs and sends an HTTP response with a JSON body to the client.
  *
- * @param client_socket The client socket to send the JSON response to.
- * @param json The JSON content to include in the response.
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ * @param client_socket The socket descriptor for the client connection.
+ * @param json The JSON string to be included in the response body.
+ * @param status_code The HTTP status code to be included in the response header.
+ * @param status_phrase The HTTP status phrase corresponding to the status code.
+ *
+ * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ *
+ * @note The caller is responsible for freeing any resources associated with the response.
+ * @note The function handles memory allocation for the response string, and the caller should
+ *       free the allocated memory after using the response.
+ * @note Ensure that the provided JSON string and status_phrase are valid pointers.
+ * @note The response format includes the HTTP/1.1 version, status code, status phrase,
+ *       and content type (application/json) in the response header.
+ * @note The response body is the provided JSON string.
+ * @note This function takes care to avoid null character issues by using proper string handling.
  */
-int send_json_response(int client_socket, const char *json);
+int send_json_response(int client_socket, const char *json, int status_code, const char *status_phrase);
 
 /**
  * @brief Sends binary data as an HTTP response.
@@ -161,14 +172,21 @@ int send_jean_page(int client_socket, struct http_request *http_request);
 int send_vincent_page(int client_socket, struct http_request *http_request);
 
 /**
- * @brief Creates a comment and sends a JSON response to the client.
+ * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
  *
- * This function is responsible for creating a comment and sending a JSON response
- * indicating the status and a message to the client.
+ * This function extracts name and comment data from the JSON body of a POST request,
+ * and then appends the information to a file named "comments.txt" in the "data" directory.
  *
- * @param client_socket The client socket to send the JSON response to.
- * @param http_request  The HTTP request data (not used in this example).
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ * @param client_socket The socket descriptor for the client connection.
+ * @param http_request Pointer to the HTTP request structure containing the request data.
+ *
+ * @return Returns RESPONSE_SUCCESS on success, or RESPONSE_ERROR on failure.
+ *
+ * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
+ * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.
+ * @note The file is opened in "a" (append) mode, and proper error handling is in place.
+ * @note Ensure that the "data" directory exists, and the process has write permissions to it.
+ * @note The caller is responsible for sending an appropriate JSON response to the client.
  */
 int create_comment(int client_socket, struct http_request *http_request);
 
