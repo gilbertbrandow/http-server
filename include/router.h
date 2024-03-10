@@ -9,6 +9,7 @@
  */
 #ifndef ROUTER_H
 #define ROUTER_H
+
 #define MAX_REQUEST_SIZE 3000
 
 #include <stdint.h>
