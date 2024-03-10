@@ -31,35 +31,24 @@
  */
 int send_index_page(int client_socket)
 {
-    const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+    return send_html_page(client_socket, "public/html/index.html");
+}
 
-    char *response_body = read_html_file("public/html/index.html");
-
-    if (response_body == NULL)
-        return RESPONSE_ERROR;
-
-    char *response = malloc(strlen(response_header) + strlen(response_body) + 1);
-
-    if (response == NULL)
-    {
-        free(response_body);
-        return RESPONSE_ERROR;
-    }
-
-    strcpy(response, response_header);
-    strcat(response, response_body);
-
-    if (write(client_socket, response, strlen(response)) < 0) {
-        perror("Error writing to client");
-        free(response);
-        free(response_body);
-        return RESPONSE_ERROR;
-    }
-    
-    free(response);
-    free(response_body);
-
-    return RESPONSE_SUCCESS;
+/**
+ * @brief Generates the HTTP response for the Frida Kahlo page.
+ *
+ * This function reads the content of the 'public/html/frida.html' file and constructs
+ * an HTTP response containing the file content. The response includes the necessary
+ * headers for an HTML response.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
+int send_frida_page(int client_socket)
+{
+    return send_html_page(client_socket, "public/html/frida.html");
 }
 
 /**
@@ -99,6 +88,52 @@ int send_favicon(int client_socket)
     }
 
     free(ico_content);
+
+    return RESPONSE_SUCCESS;
+}
+
+/**
+ * @brief Generates an HTTP response for an HTML page.
+ *
+ * This function reads the content of the specified HTML file and constructs
+ * an HTTP response containing the file content. The response includes the necessary
+ * headers for an HTML response.
+ *
+ * @param client_socket The client socket to write the response to.
+ * @param html_filename The path to the HTML file to be sent in the response.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
+ * @note The caller is responsible for freeing the allocated memory.
+ * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
+ */
+int send_html_page(int client_socket, const char *html_filename)
+{
+    const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
+
+    char *response_body = read_html_file(html_filename);
+
+    if (response_body == NULL)
+        return RESPONSE_ERROR;
+
+    char *response = malloc(strlen(response_header) + strlen(response_body) + 1);
+
+    if (response == NULL)
+    {
+        free(response_body);
+        return RESPONSE_ERROR;
+    }
+
+    strcpy(response, response_header);
+    strcat(response, response_body);
+
+    if (write(client_socket, response, strlen(response)) < 0) {
+        perror("Error writing to client");
+        free(response);
+        free(response_body);
+        return RESPONSE_ERROR;
+    }
+    
+    free(response);
+    free(response_body);
 
     return RESPONSE_SUCCESS;
 }
