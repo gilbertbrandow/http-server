@@ -65,11 +65,13 @@ struct http_request
  * @brief Type definition for a function pointer representing a route action.
  *
  * A `route_action` function is invoked when a specific route is matched, and it
- * contains the logic for handling the associated HTTP request. It returns a
- * dynamically allocated string that serves as the HTTP response.
+ * contains the logic for handling the associated HTTP request. The function writes
+ * the HTTP response directly to the client socket and returns a response constant
+ * indicating success or a specific error condition.
  *
- * @return The dynamically allocated string representing the HTTP response.
- * @note The caller is responsible for allocating the memory and router will free it.
+ * @param client_socket The client socket to which the HTTP response is written.
+ * @return A response constant indicating the outcome of the route action.
+ * @note The caller is responsible for handling the response constant appropriately.
  */
 typedef int (*route_action)(int client_socket);
 

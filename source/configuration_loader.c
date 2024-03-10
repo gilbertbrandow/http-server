@@ -8,13 +8,14 @@
  * (©) Copyright MIT License.
  */
 
+#include "configuration_loader.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <stddef.h>
 #include <netinet/in.h>
 #include <string.h>
-#include <configuration_loader.h>
 
 void load_configuration_variables(const char *filename)
 {
