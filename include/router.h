@@ -11,7 +11,7 @@
 #ifndef ROUTER_H
 #define ROUTER_H
 
-#define MAX_REQUEST_SIZE 3000
+#define MAX_REQUEST_BODY_LENGTH 4096
 #define RESPONSE_SUCCESS 0     /**< Constant indicating successful response. */
 #define RESPONSE_ERROR -1      /**< Constant indicating an error in response handling. */
 
@@ -62,6 +62,7 @@ struct http_request
     char sec_fetch_dest[20];                 /**< The value of the Sec-Fetch-Dest header. */
     char referer[100];                       /**< The value of the Referer header. */
     char cookie[100];                        /**< The value of the Cookie header. */
+    char body[MAX_REQUEST_BODY_LENGTH];
 };
 
 /**
