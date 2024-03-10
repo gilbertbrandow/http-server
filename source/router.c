@@ -66,17 +66,12 @@ void route(struct http_request *http_request, int client_socket)
             strcmp(http_request->path, routes[i].url) == 0)
         {
 
-            char *response = routes[i].action();
-
-            if(response == NULL) {
+            if (routes[i].action(client_socket) != 0)
+            {
                 write(client_socket, response_500, strlen(response_500));
                 printf("Connection served 500 (Internal Server Error).\n");
                 return;
             }
-
-            write(client_socket, response, strlen(response));
-
-            free(response);
 
             printf("Connection served 200.\n");
             return;

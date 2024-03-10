@@ -70,7 +70,7 @@ struct http_request
  * @return The dynamically allocated string representing the HTTP response.
  * @note The caller is responsible for allocating the memory and router will free it.
  */
-typedef char* (*route_action)(void);
+typedef int (*route_action)(int client_socket);
 
 /**
  * @struct route
