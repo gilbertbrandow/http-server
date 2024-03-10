@@ -24,7 +24,7 @@ volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
 
 /**
- * @brief Array of routes to define the server's behavior.
+ * @brief Array of routes as availabled endpoints.
  */
 struct route routes[] = {
     {GET, "/", send_index_page},
