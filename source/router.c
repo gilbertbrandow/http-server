@@ -42,7 +42,6 @@ void handle_request(int client_socket)
 
     read(client_socket, request_data, sizeof(struct http_request));
 
-    // printf("%s\n", request_data);
     http_request = http_request_constructor(request_data);
 
     route(&http_request, client_socket);
@@ -196,6 +195,11 @@ struct http_request http_request_constructor(char *request_data)
             {
                 strncpy(http_request.cookie, value, sizeof(http_request.cookie) - 1);
                 http_request.cookie[sizeof(http_request.cookie) - 1] = '\0';
+            }
+            else if (strcmp(key, "Content-Type") == 0)
+            {
+                strncpy(http_request.content_type, value, sizeof(http_request.content_type) - 1);
+                http_request.content_type[sizeof(http_request.content_type) - 1] = '\0';
             }
         }
     }

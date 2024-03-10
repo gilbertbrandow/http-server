@@ -52,6 +52,7 @@ struct http_request
     char accept[200];                        /**< The value of the Accept header. */
     char accept_encoding[100];               /**< The value of the Accept-Encoding header. */
     char accept_language[100];               /**< The value of the Accept-Language header. */
+    char content_type[200];                  /**< The value of the Content-Type header. */
     char cache_control[20];                  /**< The value of the Cache-Control header. */
     char user_agent[200];                    /**< The value of the User-Agent header. */
     char sec_ch_ua[100];                     /**< The value of the Sec-CH-UA header. */
