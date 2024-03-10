@@ -87,7 +87,7 @@ int send_binary_data(int client_socket, const char *content_type, const char *bi
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
-int send_index_page(int client_socket);
+int send_index_page(int client_socket, struct http_request *http_request);
 
 /**
  * @brief Generates the HTTP response for the Frida Kahlo page.
@@ -101,21 +101,8 @@ int send_index_page(int client_socket);
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
-int send_frida_page(int client_socket);
+int send_frida_page(int client_socket, struct http_request *http_request);
 
-int send_the_two_fridas(int client_socket);
-
-/**
- * @brief Generates the HTTP response for the favicon.
- *
- * This function reads the content of the 'public/images/favicon.ico' file and constructs
- * an HTTP response containing the file content. The response includes the necessary
- * headers for an ICO response.
- *
- * @param client_socket The socket to which the HTTP response will be sent.
- * @return A status code indicating success or failure.
- * @note The caller should handle the return value to check for errors.
- */
-int send_favicon(int client_socket);
+int send_image(int client_socket, struct http_request *http_request);
 
 #endif // RESPONSE_HANDLER_H

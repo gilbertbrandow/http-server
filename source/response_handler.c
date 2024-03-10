@@ -10,7 +10,7 @@
  */
 
 #include "response_handler.h"
-#include "response_constants.h"
+#include "router.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -29,7 +29,7 @@
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
-int send_index_page(int client_socket)
+int send_index_page(int client_socket, struct http_request *http_request)
 {
     return send_html_page(client_socket, "public/html/index.html");
 }
@@ -46,43 +46,15 @@ int send_index_page(int client_socket)
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
-int send_frida_page(int client_socket)
+int send_frida_page(int client_socket, struct http_request *http_request)
 {
     return send_html_page(client_socket, "public/html/frida.html");
 }
 
-/**
- * @brief Sends the the-two-fridas.jpg file as a binary response to the client.
- *
- * This function constructs an HTTP response header and sends the binary content
- * of the 'public/images/the-two-fridas.jpg' file to the client. The response includes
- * the necessary headers for an icon response.
- *
- * @param client_socket The client socket to write the response to.
- * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
- * @note The caller is responsible for freeing the allocated memory.
- * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
- */
-int send_the_two_fridas(int client_socket)
+int send_image(int client_socket, struct http_request *http_request)
 {
-    return send_binary_data(client_socket, "image/jpeg", "public/images/the-two-fridas.jpg");
-}
-
-/**
- * @brief Sends the favicon.ico file as a binary response to the client.
- *
- * This function constructs an HTTP response header and sends the binary content
- * of the 'public/images/favicon.ico' file to the client. The response includes
- * the necessary headers for an icon response.
- *
- * @param client_socket The client socket to write the response to.
- * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on write error, ROUTER_ERROR_OTHER for other errors.
- * @note The caller is responsible for freeing the allocated memory.
- * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
- */
-int send_favicon(int client_socket)
-{
-    return send_binary_data(client_socket, "image/x-icon", "public/images/c-32x32.png");
+    //How can I know whuch content type the response should be sent with?
+    return send_binary_data(client_socket, "image/jpeg", http_request->path);
 }
 
 /**
@@ -118,13 +90,14 @@ int send_html_page(int client_socket, const char *html_filename)
     strcpy(response, response_header);
     strcat(response, response_body);
 
-    if (write(client_socket, response, strlen(response)) < 0) {
+    if (write(client_socket, response, strlen(response)) < 0)
+    {
         perror("Error writing to client");
         free(response);
         free(response_body);
         return RESPONSE_ERROR;
     }
-    
+
     free(response);
     free(response_body);
 

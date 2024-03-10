@@ -12,6 +12,8 @@
 #define ROUTER_H
 
 #define MAX_REQUEST_SIZE 3000
+#define RESPONSE_SUCCESS 0     /**< Constant indicating successful response. */
+#define RESPONSE_ERROR -1      /**< Constant indicating an error in response handling. */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -74,7 +76,7 @@ struct http_request
  * @return A response constant indicating the outcome of the route action.
  * @note The caller is responsible for handling the response constant appropriately.
  */
-typedef int (*route_action)(int client_socket);
+typedef int (*route_action)(int client_socket, struct http_request *http_request);
 
 /**
  * @struct route
