@@ -105,6 +105,64 @@ int send_image(int client_socket, struct http_request *http_request)
 }
 
 /**
+ * @brief Creates a comment and sends a JSON response to the client.
+ *
+ * This function is responsible for creating a comment and sending a JSON response
+ * indicating the status and a message to the client.
+ *
+ * @param client_socket The client socket to send the JSON response to.
+ * @param http_request  The HTTP request data (not used in this example).
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ */
+int create_comment(int client_socket, struct http_request *http_request)
+{
+    const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
+    return send_json_response(client_socket, json_response);
+}
+
+/**
+ * @brief Sends a JSON response to the client.
+ *
+ * This function constructs a JSON response with a predefined header and the provided JSON content.
+ * It sends the response to the specified client socket.
+ *
+ * @param client_socket The client socket to send the JSON response to.
+ * @param json The JSON content to include in the response.
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ */
+int send_json_response(int client_socket, const char *json)
+{
+    const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\n\r\n";
+
+    if (json == NULL)
+    {
+        return RESPONSE_ERROR;
+    }
+
+    size_t response_length = strlen(response_header) + strlen(json);
+    char *response = malloc(response_length + 1);
+
+    if (response == NULL)
+    {
+        perror("Error allocating memory");
+        return RESPONSE_ERROR;
+    }
+
+    sprintf(response, "%s%s", response_header, json);
+
+    if (write(client_socket, response, response_length) < 0)
+    {
+        perror("Error writing to client");
+        free(response);
+        return RESPONSE_ERROR;
+    }
+
+    free(response);
+
+    return RESPONSE_SUCCESS;
+}
+
+/**
  * @brief Generates an HTTP response for an HTML page.
  *
  * This function reads the content of the specified HTML file and constructs

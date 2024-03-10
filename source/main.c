@@ -32,6 +32,7 @@ struct route routes[] = {
     {GET, "/jean-michel-basquiat", send_jean_page},
     {GET, "/vincent-van-gogh", send_vincent_page},
     {GET, "^/public/images/", send_image},
+    {POST, "/comments", create_comment},
 };
 
 /**

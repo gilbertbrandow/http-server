@@ -9,8 +9,8 @@
  * Released under the MIT License. See LICENSE file for details.
  */
 
-#ifndef ROUTE_ACTIONS.H
-#define ROUTE_ACTIONS.H
+#ifndef ROUTE_ACTIONS_H
+#define ROUTE_ACTIONS_H
 
 #include "router.h"
 
@@ -59,6 +59,18 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size);
  * @warning If any errors occur during file reading or memory allocation, RESPONSE_ERROR is returned.
  */
 int send_html_page(int client_socket, const char *html_filename);
+
+/**
+ * @brief Sends a JSON response to the client.
+ *
+ * This function constructs a JSON response with a predefined header and the provided JSON content.
+ * It sends the response to the specified client socket.
+ *
+ * @param client_socket The client socket to send the JSON response to.
+ * @param json The JSON content to include in the response.
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ */
+int send_json_response(int client_socket, const char *json);
 
 /**
  * @brief Sends binary data as an HTTP response.
@@ -148,4 +160,16 @@ int send_jean_page(int client_socket, struct http_request *http_request);
  */
 int send_vincent_page(int client_socket, struct http_request *http_request);
 
-#endif // ROUTE_ACTIONS.H
+/**
+ * @brief Creates a comment and sends a JSON response to the client.
+ *
+ * This function is responsible for creating a comment and sending a JSON response
+ * indicating the status and a message to the client.
+ *
+ * @param client_socket The client socket to send the JSON response to.
+ * @param http_request  The HTTP request data (not used in this example).
+ * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ */
+int create_comment(int client_socket, struct http_request *http_request);
+
+#endif // ROUTE_ACTIONS_H
