@@ -1,5 +1,5 @@
 /**
- * @file controller.c
+ * @file response_handler.c
  * @brief
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
@@ -8,10 +8,15 @@
  * (©) Copyright MIT License.
  */
 
+#include <response_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <controller.h>
+#include <unistd.h>
+
+#define ROUTER_SUCCESS 0
+#define ROUTER_ERROR_WRITE -1
+#define ROUTER_ERROR_OTHER -2
 
 /**
  * @brief Generates the HTTP response for the index page.
@@ -24,29 +29,37 @@
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, NULL is returned.
  */
-char *index_action(void)
+int send_index_page(int client_socket)
 {
     const char *response_header = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n";
 
-    char *response_body = read_html_file("public/html/index.htmls");
+    char *response_body = read_html_file("public/html/index.html");
 
     if (response_body == NULL)
-        return NULL;
+        return ROUTER_ERROR_WRITE;
 
     char *response = malloc(strlen(response_header) + strlen(response_body) + 1);
 
     if (response == NULL)
     {
         free(response_body);
-        return NULL;
+        return ROUTER_ERROR_WRITE;
     }
 
     strcpy(response, response_header);
     strcat(response, response_body);
 
+    if (write(client_socket, response, strlen(response)) < 0) {
+        perror("Error writing to client");
+        free(response);
+        free(response_body);
+        return ROUTER_ERROR_WRITE;
+    }
+    
+    free(response);
     free(response_body);
 
-    return response;
+    return ROUTER_SUCCESS;
 }
 
 /**
@@ -62,7 +75,8 @@ char *index_action(void)
  */
 char *read_html_file(const char *filename)
 {
-    if (strlen(filename) <= 5 || strcmp(filename + strlen(filename) - 5, ".html") != 0) {
+    if (strlen(filename) <= 5 || strcmp(filename + strlen(filename) - 5, ".html") != 0)
+    {
         fprintf(stderr, "Invalid HTML file: '%s'\n", filename);
         return NULL;
     }

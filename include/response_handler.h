@@ -1,5 +1,5 @@
 /**
- * @file controller.h
+ * @file response_handler.h
  * @brief
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
@@ -7,6 +7,9 @@
  *
  * (©) Copyright MIT License.
  */
+
+#include <stdint.h>
+#include <stddef.h>
 
 /**
  * @brief Reads the content of a html file and returns it as a dynamically allocated string.
@@ -32,4 +35,4 @@ char *read_html_file(const char *filename);
  * @note The caller is responsible for freeing the allocated memory.
  * @warning If any errors occur during file reading or memory allocation, NULL is returned.
  */
-char *index_action(void);
+int send_index_page(int client_socket);

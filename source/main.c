@@ -11,13 +11,14 @@
 #include "configuration_loader.h"
 #include "server.h"
 #include "router.h"
-#include "controller.h"
+#include "response_handler.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <arpa/inet.h>
 
 struct route routes[] = {
-    {GET, "/", index_action},
+    {GET, "/", send_index_page},
+    /* {GET, "/favicon.ico", favicon_action}, */
 };
 
 size_t num_routes = sizeof(routes) / sizeof(routes[0]);

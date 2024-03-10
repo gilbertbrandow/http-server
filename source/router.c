@@ -52,8 +52,8 @@ void handle_request(int client_socket)
  *
  * This function iterates through an array of routes, matches the HTTP request's method and path
  * to a route, and executes the corresponding action. If no matching route is found, a default
- * "404 Not Found" response is sent to the client. If the response returned from the controller action
- *  is null a default "500 Internal server error" is sent to the client.
+ * "404 Not Found" response is sent to the client. If the response_handler action returns an error
+ * a default "500 Internal server error" is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
  * @param client_socket The socket connected to the client.
@@ -66,17 +66,12 @@ void route(struct http_request *http_request, int client_socket)
             strcmp(http_request->path, routes[i].url) == 0)
         {
 
-            char *response = routes[i].action();
-
-            if(response == NULL) {
+            if (routes[i].action(client_socket) != 0)
+            {
                 write(client_socket, response_500, strlen(response_500));
                 printf("Connection served 500 (Internal Server Error).\n");
                 return;
             }
-
-            write(client_socket, response, strlen(response));
-
-            free(response);
 
             printf("Connection served 200.\n");
             return;
