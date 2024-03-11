@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 
 /**
  * @brief Reads the content of an HTML file and returns it as a dynamically allocated string.
@@ -116,5 +117,9 @@ int send_binary_data(int client_socket, const char *content_type, const char *bi
  * @note This function takes care to avoid null character issues by using proper string handling.
  */
 int send_redirect_response(int client_socket, const char *redirect_url);
+
+FILE* open_shared_file(const char *filename, const char *restrict_mode);
+
+int close_shared_file(FILE *file, const char *filename); 
 
 #endif // ROUTE_ACTIONS_HELPER_H

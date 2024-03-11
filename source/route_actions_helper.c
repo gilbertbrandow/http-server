@@ -224,9 +224,7 @@ char *read_html_file(const char *filename)
         return NULL;
     }
 
-    resource_mutex_lock(filename);
-
-    FILE *file = fopen(filename, "r");
+    FILE *file = open_shared_file(filename, "r");
 
     if (file == NULL)
     {
@@ -251,9 +249,7 @@ char *read_html_file(const char *filename)
 
     content[bytes_read] = '\0';
 
-    fclose(file);
-
-    resource_mutex_unlock(filename);
+    close_shared_file(file, filename);
 
     return content;
 }
@@ -272,9 +268,8 @@ char *read_html_file(const char *filename)
  */
 uint8_t *read_binary_file(const char *filename, size_t *file_size)
 {
-    resource_mutex_lock(filename);
+    FILE *file = open_shared_file(filename, "rb");
 
-    FILE *file = fopen(filename, "rb");
     if (file == NULL)
     {
         fprintf(stderr, "Error opening file: %s\n", filename);
@@ -295,11 +290,23 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
 
     size_t bytes_read = fread(content, 1, *file_size, file);
 
-    fclose(file);
-
-    resource_mutex_unlock(filename);
+    close_shared_file(file, filename);
 
     return content;
 }
+
+FILE* open_shared_file(const char *filename, const char *restrict_mode) 
+{
+    resource_mutex_lock(filename);
+    return fopen(filename, restrict_mode);
+}
+
+int close_shared_file(FILE *file, const char *filename) 
+{
+    int status = fclose(file);
+    resource_mutex_unlock(filename);
+    return status; 
+}
+
 
 #endif
