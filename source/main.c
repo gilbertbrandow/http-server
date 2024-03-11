@@ -36,8 +36,8 @@ const struct route routes[] = {
     {GET, "/jean-michel-basquiat", send_jean_page},
     {GET, "/vincent-van-gogh", send_vincent_page},
     {GET, "^/public/images/", send_image},
-    {POST, "/comments", create_comment},
     {GET, "/favicon.ico", redirect_favicon},
+    {POST, "/comments", create_comment},
 };
 
 /**
@@ -114,8 +114,6 @@ void launch(struct server *server)
 
     while (!shutdown_flag)
     {
-        printf("Waiting for new connection...\n");
-
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
 
         pthread_t thread;
@@ -123,6 +121,7 @@ void launch(struct server *server)
         if (pthread_create(&thread, NULL, handle_connection, (void *)(intptr_t)client_socket) != 0)
         {
             perror("Error creating thread");
+            return;
         }
 
         pthread_detach(thread);
