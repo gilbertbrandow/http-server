@@ -10,6 +10,7 @@
  */
 
 #include "route_actions.h"
+#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -243,11 +244,9 @@ int send_json_response(int client_socket, const char *json, int status_code, con
         return RESPONSE_ERROR;
     }
 
-    // Create the response string
     snprintf(response, header_length + 1, response_format, status_code, status_phrase);
     strncat(response, json, response_length - header_length - 1); // Use strncat with proper size
 
-    // Write the response to the client socket
     if (write(client_socket, response, response_length - 1) < 0)
     {
         perror("Error writing to client");

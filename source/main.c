@@ -13,6 +13,7 @@
 #include "server.h"
 #include "router.h"
 #include "route_actions.h"
+#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,9 +22,10 @@
 #include <unistd.h>
 #include <pthread.h>
 
+pthread_mutex_t terminal_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
-pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
  * @brief Array of routes as availabled endpoints.
@@ -111,11 +113,13 @@ void launch(struct server *server)
 
     while (!shutdown_flag)
     {
+        printf("Waiting for new connection...\n");
+
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
 
         pthread_t thread;
-        
-        if (pthread_create(&thread, NULL, handle_connection, (void *)&client_socket) != 0)
+
+        if (pthread_create(&thread, NULL, handle_connection, (void *)(intptr_t)client_socket) != 0)
         {
             perror("Error creating thread");
         }
@@ -128,17 +132,17 @@ void launch(struct server *server)
 
 void *handle_connection(void *client_socket_ptr)
 {
-    int client_socket = *((int *)client_socket_ptr);
-    char* status_message = handle_request(client_socket);
+    int client_socket = (int)(intptr_t)client_socket_ptr;
 
-    pthread_mutex_lock(&print_mutex);
+    char *status_message = handle_request(client_socket);
 
+    pthread_mutex_lock(&terminal_mutex);
     printf("Server Log: %s\n", status_message);
-
-    pthread_mutex_unlock(&print_mutex);
+    pthread_mutex_unlock(&terminal_mutex);
 
     free(status_message);
 
+    shutdown(client_socket, SHUT_RDWR);
     close(client_socket);
 
     pthread_exit(NULL);
