@@ -1,6 +1,6 @@
 /**
  * @file mutex.c
- * @brief
+ * @brief Implementation of resource mutex functions.
  *
  * Original author: Simon Gustafsson (@gilbertbrandow)
  * Created: 11th of March 2024
@@ -17,10 +17,30 @@
 #include <string.h>
 #include <stdlib.h>
 
+/**
+ * @brief Mutex list head pointer.
+ */
 struct resource_mutex *resource_mutex_list = NULL;
+
+/**
+ * @brief Terminal mutex for synchronized terminal output.
+ */
 pthread_mutex_t terminal_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+/**
+ * @brief Mutex for protecting access to the resource mutex list.
+ */
 pthread_mutex_t resource_mutex_list_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+/**
+ * @brief Lock a resource mutex identified by the given resource path.
+ *
+ * This function searches for a resource mutex with the specified resource path.
+ * If found, it locks the mutex; otherwise, a new resource mutex is created and locked.
+ *
+ * @param resource_path The path of the resource to lock.
+ * @return 0 if successful, -1 if an error occurred.
+ */
 int resource_mutex_lock(const char *resource_path)
 {
     pthread_mutex_lock(&resource_mutex_list_mutex);
@@ -34,7 +54,6 @@ int resource_mutex_lock(const char *resource_path)
         {
             pthread_mutex_lock(&(current->mutex));
             pthread_mutex_unlock(&resource_mutex_list_mutex);
-
             return 0;
         }
 
@@ -71,6 +90,15 @@ int resource_mutex_lock(const char *resource_path)
     return 0;
 }
 
+/**
+ * @brief Unlock a resource mutex identified by the given resource path.
+ *
+ * This function searches for a resource mutex with the specified resource path
+ * and unlocks it if found.
+ *
+ * @param resource_path The path of the resource to unlock.
+ * @return 0 if successful, -1 if the resource mutex was not found.
+ */
 int resource_mutex_unlock(const char *resource_path)
 {
     pthread_mutex_lock(&resource_mutex_list_mutex);
@@ -84,7 +112,6 @@ int resource_mutex_unlock(const char *resource_path)
         {
             pthread_mutex_unlock(&(current->mutex));
             pthread_mutex_unlock(&resource_mutex_list_mutex);
-
             return 0;
         }
 
@@ -97,6 +124,9 @@ int resource_mutex_unlock(const char *resource_path)
     return -1;
 }
 
+/**
+ * @brief Free all allocated memory for the resource mutex list.
+ */
 void free_resource_mutex_list()
 {
     pthread_mutex_lock(&resource_mutex_list_mutex);
