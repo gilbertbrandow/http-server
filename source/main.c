@@ -37,6 +37,7 @@ const struct route routes[] = {
     {GET, "/vincent-van-gogh", send_vincent_page},
     {GET, "^/public/images/", send_image},
     {POST, "/comments", create_comment},
+    {GET, "/favicon.ico", redirect_favicon},
 };
 
 /**
