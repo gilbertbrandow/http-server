@@ -23,6 +23,7 @@
 
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
+pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /**
  * @brief Array of routes as availabled endpoints.
@@ -107,6 +108,7 @@ void launch(struct server *server)
     signal(SIGINT, handle_shutdown);
 
     printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
+
     while (!shutdown_flag)
     {
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
@@ -127,8 +129,18 @@ void launch(struct server *server)
 void *handle_connection(void *client_socket_ptr)
 {
     int client_socket = *((int *)client_socket_ptr);
-    handle_request(client_socket);
+    char* status_message = handle_request(client_socket);
+
+    pthread_mutex_lock(&print_mutex);
+
+    printf("Server Log: %s\n", status_message);
+
+    pthread_mutex_unlock(&print_mutex);
+
+    free(status_message);
+
     close(client_socket);
+
     pthread_exit(NULL);
 }
 
@@ -136,13 +148,13 @@ void handle_shutdown(int signum)
 {
     printf("\nReceived termination signal. Initiating graceful shutdown...\n");
 
+    shutdown_flag = 1;
+    
     if (global_server != NULL)
     {
         shutdown(global_server->socket, SHUT_RDWR);
         close(global_server->socket);
     }
-
-    shutdown_flag = 1;
 
     return;
 }
