@@ -12,8 +12,8 @@
 #define ROUTER_H
 
 #define MAX_REQUEST_BODY_LENGTH 4096
-#define RESPONSE_SUCCESS 0     /**< Constant indicating successful response. */
-#define RESPONSE_ERROR -1      /**< Constant indicating an error in response handling. */
+#define RESPONSE_SUCCESS 0 /**< Constant indicating successful response. */
+#define RESPONSE_ERROR -1  /**< Constant indicating an error in response handling. */
 
 #include <stdint.h>
 #include <stddef.h>
@@ -22,11 +22,12 @@ extern const char *response;
 
 /**
  * @brief Enum representing HTTP request methods.
- * 
+ *
  * This enumeration defines symbolic constants for HTTP request methods.
  *
  */
-enum request_method {
+enum request_method
+{
     GET,
     POST,
     PUT,
@@ -44,25 +45,25 @@ enum request_method {
  */
 struct http_request
 {
-    enum request_method method;              /**< The HTTP request method (e.g., GET, POST). */
-    char path[100];                          /**< The requested path in the URL. */
-    char version[10];                        /**< The HTTP protocol version (e.g., HTTP/1.1). */
-    char host[100];                          /**< The value of the Host header. */
-    char connection[20];                     /**< The value of the Connection header. */
-    char accept[200];                        /**< The value of the Accept header. */
-    char accept_encoding[100];               /**< The value of the Accept-Encoding header. */
-    char accept_language[100];               /**< The value of the Accept-Language header. */
-    char content_type[200];                  /**< The value of the Content-Type header. */
-    char cache_control[20];                  /**< The value of the Cache-Control header. */
-    char user_agent[200];                    /**< The value of the User-Agent header. */
-    char sec_ch_ua[100];                     /**< The value of the Sec-CH-UA header. */
-    char sec_ch_ua_mobile[20];               /**< The value of the Sec-CH-UA-Mobile header. */
-    char sec_ch_ua_platform[20];             /**< The value of the Sec-CH-UA-Platform header. */
-    char sec_fetch_site[20];                 /**< The value of the Sec-Fetch-Site header. */
-    char sec_fetch_mode[20];                 /**< The value of the Sec-Fetch-Mode header. */
-    char sec_fetch_dest[20];                 /**< The value of the Sec-Fetch-Dest header. */
-    char referer[100];                       /**< The value of the Referer header. */
-    char cookie[100];                        /**< The value of the Cookie header. */
+    enum request_method method;  /**< The HTTP request method (e.g., GET, POST). */
+    char path[100];              /**< The requested path in the URL. */
+    char version[10];            /**< The HTTP protocol version (e.g., HTTP/1.1). */
+    char host[100];              /**< The value of the Host header. */
+    char connection[20];         /**< The value of the Connection header. */
+    char accept[200];            /**< The value of the Accept header. */
+    char accept_encoding[100];   /**< The value of the Accept-Encoding header. */
+    char accept_language[100];   /**< The value of the Accept-Language header. */
+    char content_type[200];      /**< The value of the Content-Type header. */
+    char cache_control[20];      /**< The value of the Cache-Control header. */
+    char user_agent[200];        /**< The value of the User-Agent header. */
+    char sec_ch_ua[100];         /**< The value of the Sec-CH-UA header. */
+    char sec_ch_ua_mobile[20];   /**< The value of the Sec-CH-UA-Mobile header. */
+    char sec_ch_ua_platform[20]; /**< The value of the Sec-CH-UA-Platform header. */
+    char sec_fetch_site[20];     /**< The value of the Sec-Fetch-Site header. */
+    char sec_fetch_mode[20];     /**< The value of the Sec-Fetch-Mode header. */
+    char sec_fetch_dest[20];     /**< The value of the Sec-Fetch-Dest header. */
+    char referer[100];           /**< The value of the Referer header. */
+    char cookie[100];            /**< The value of the Cookie header. */
     char body[MAX_REQUEST_BODY_LENGTH];
 };
 
@@ -88,7 +89,8 @@ typedef int (*route_action)(int client_socket, struct http_request *http_request
  * HTTP request method, URL pattern, and a function pointer to the associated
  * route action.
  */
-struct route {
+struct route
+{
     enum request_method method; /**< HTTP request method for the route. */
     const char *url;            /**< URL pattern associated with the route. */
     route_action action;        /**< Function pointer to the route action. */
@@ -134,13 +136,16 @@ enum request_method parse_request_method(const char *method_string);
 struct http_request http_request_constructor(char *request_data);
 
 /**
- * @brief Handles an incoming client request.
+ * @brief Handles an HTTP request received from a client.
  *
- * This function reads the request from the client socket, processes it, and sends back a response via route functione and then closes the socket.
+ * Reads the HTTP request from the client socket, constructs an HTTP request struct,
+ * and then routes the request using the route function. Returns a dynamically allocated
+ * string describing the status of the connection. The caller is responsible for freeing the memory.
  *
- * @param client_socket The file descriptor of the client socket.
+ * @param client_socket The socket connected to the client.
+ * @return A dynamically allocated string describing the status of the connection. The caller is responsible for freeing the memory.
  */
-void handle_request(int client_socket);
+char *handle_request(int client_socket);
 
 /**
  * @brief Checks whether a given path matches a specified route pattern.
@@ -159,14 +164,17 @@ void handle_request(int client_socket);
 int is_route_matching(const char *pattern, const char *path);
 
 /**
- * @brief Routes the HTTP request to the appropriate handler.
+ * @brief Routes an HTTP request and sends a response to the client based on predefined routes.
  *
- * This function takes an HTTP request structure, determines the appropriate action based on the
- * request details, and sends the corresponding response back to the client.
+ * This function iterates through an array of routes, matches the HTTP request's method and path
+ * to a route, and executes the corresponding action. If no matching route is found, a default
+ * "404 Not Found" response is sent to the client. If the route action returns an error,
+ * a default "500 Internal server error" is sent to the client.
  *
- * @param http_request A pointer to the HTTP request structure.
- * @param client_socket The file descriptor of the client socket.
+ * @param http_request Pointer to the HTTP request struct.
+ * @param client_socket The socket connected to the client.
+ * @return A dynamically allocated string describing the status of the connection. The caller is responsible for freeing the memory.
  */
-void route(struct http_request *http_request, int client_socket);
+char *route(struct http_request *http_request, int client_socket);
 
 #endif

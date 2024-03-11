@@ -27,26 +27,32 @@ const char *response_404 = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\
 const char *response_500 = "HTTP/1.1 500 Internal Server Error\r\nContent-Type: text/html\r\nContent-Length: 119\r\n\r\n<html><head><title>500 Internal Server Error</title></head><body><h1>500 Internal Server Error</h1></body></html>";
 
 /**
- * @brief Handles an incoming HTTP request.
+ * @brief Handles an HTTP request received from a client.
  *
- * This function reads the HTTP request from the client socket, constructs an
- * HTTP request struct, and routes the request.
+ * Reads the HTTP request from the client socket, constructs an HTTP request struct,
+ * and then routes the request using the route function. Returns a dynamically allocated
+ * string describing the status of the connection. The caller is responsible for freeing the memory.
  *
  * @param client_socket The socket connected to the client.
+ * @return A dynamically allocated string describing the status of the connection. The caller is responsible for freeing the memory.
  */
-void handle_request(int client_socket)
+char *handle_request(int client_socket)
 {
     char request_data[sizeof(struct http_request)];
 
     struct http_request http_request;
 
-    read(client_socket, request_data, sizeof(struct http_request));
+    ssize_t bytesRead = read(client_socket, request_data, sizeof(struct http_request));
+
+    if (bytesRead < 0)
+    {
+        perror("Error reading from client socket");
+        return NULL;
+    }
 
     http_request = http_request_constructor(request_data);
 
-    route(&http_request, client_socket);
-
-    close(client_socket);
+    return route(&http_request, client_socket);
 }
 
 /**
@@ -54,14 +60,17 @@ void handle_request(int client_socket)
  *
  * This function iterates through an array of routes, matches the HTTP request's method and path
  * to a route, and executes the corresponding action. If no matching route is found, a default
- * "404 Not Found" response is sent to the client. If the route action returns an error
+ * "404 Not Found" response is sent to the client. If the route action returns an error,
  * a default "500 Internal server error" is sent to the client.
  *
  * @param http_request Pointer to the HTTP request struct.
  * @param client_socket The socket connected to the client.
+ * @return A dynamically allocated string describing the status of the connection. The caller is responsible for freeing the memory.
  */
-void route(struct http_request *http_request, int client_socket)
+char *route(struct http_request *http_request, int client_socket)
 {
+    char *status_message = NULL;
+
     for (size_t i = 0; i < num_routes; ++i)
     {
         if (http_request->method == routes[i].method &&
@@ -70,20 +79,48 @@ void route(struct http_request *http_request, int client_socket)
 
             if (routes[i].action(client_socket, http_request) != RESPONSE_SUCCESS)
             {
-                write(client_socket, response_500, strlen(response_500));
-                printf("Connection served 500 (Internal Server Error).\n");
-                return;
+                ssize_t bytesWritten = write(client_socket, response_500, strlen(response_500));
+
+                if (bytesWritten < 0)
+                {
+                    perror("write");
+                    return NULL;
+                }
+
+                if (asprintf(&status_message, "Connection served 500 (Internal Server Error). Trying to access: %s", http_request->path) < 0)
+                {
+                    perror("asprintf");
+                    return NULL;
+                }
+
+                return status_message;
             }
 
-            printf("Connection served successfully.\n");
-            return;
+            if (asprintf(&status_message, "Connection served successfully. Request path: %s", http_request->path) < 0)
+            {
+                perror("asprintf");
+                return NULL;
+            }
+
+            return status_message;
         }
     }
 
-    write(client_socket, response_404, strlen(response_404));
-    printf("Connection served 404\n");
+    ssize_t bytesWritten = write(client_socket, response_404, strlen(response_404));
 
-    return;
+    if (bytesWritten < 0)
+    {
+        perror("write");
+        return NULL;
+    }
+
+    if (asprintf(&status_message, "Connection served 404. Trying to access resource: %s", http_request->path) < 0)
+    {
+        perror("asprintf");
+        return NULL;
+    }
+
+    return status_message;
 }
 
 /**
