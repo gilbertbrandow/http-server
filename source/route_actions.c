@@ -204,6 +204,65 @@ int create_comment(int client_socket, struct http_request *http_request)
 }
 
 /**
+ * @brief Redirects the client to the favicon image.
+ *
+ * This function generates and sends an HTTP redirect response to the client,
+ * instructing it to navigate to the URL for the favicon image.
+ *
+ * @param client_socket The socket descriptor for the client connection.
+ * @param http_request Pointer to the HTTP request structure containing the request data.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ *
+ * @note The caller is responsible for freeing any resources associated with the response.
+ * @note This function utilizes the send_redirect_response function to send the redirect response.
+ * @note Ensure that the provided http_request is a valid pointer.
+ * @note The response format includes the HTTP/1.1 version, status code (302 Found),
+ *       and the "Location" header with the URL for the favicon image in the response header.
+ * @note This function takes care to avoid null character issues by using proper string handling.
+ */
+int redirect_favicon(int client_socket, struct http_request *http_request)
+{
+    return send_redirect_response(client_socket, "/public/images/c-32x32.png");
+}
+
+/**
+ * @brief Sends a redirect response to the client.
+ *
+ * This function constructs and sends an HTTP redirect response to the client,
+ * indicating that the client should navigate to the specified URL.
+ *
+ * @param client_socket The socket descriptor for the client connection.
+ * @param redirect_url The URL to which the client should be redirected.
+ * @return RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure.
+ *
+ * @note The caller is responsible for freeing any resources associated with the response.
+ * @note The function handles memory allocation for the response string, and the caller should
+ *       free the allocated memory after using the response.
+ * @note Ensure that the provided redirect_url is a valid pointer.
+ * @note The response format includes the HTTP/1.1 version, status code (302 Found),
+ *       and the "Location" header with the provided redirect URL in the response header.
+ * @note This function takes care to avoid null character issues by using proper string handling.
+ */
+int send_redirect_response(int client_socket, const char *redirect_url)
+{
+    const char *response_format = "HTTP/1.1 302 Found\r\nLocation: %s\r\n\r\n";
+    size_t response_length = snprintf(NULL, 0, response_format, redirect_url) + 1;
+    char *response = malloc(response_length);
+    snprintf(response, response_length, response_format, redirect_url);
+
+    if (write(client_socket, response, response_length - 1) < 0)
+    {
+        perror("Error writing to client");
+        free(response);
+        return RESPONSE_ERROR;
+    }
+
+    free(response);
+
+    return RESPONSE_SUCCESS;
+}
+
+/**
  * @brief Sends a JSON response to a client over a socket.
  *
  * This function constructs and sends an HTTP response with a JSON body to the client.
@@ -245,7 +304,7 @@ int send_json_response(int client_socket, const char *json, int status_code, con
     }
 
     snprintf(response, header_length + 1, response_format, status_code, status_phrase);
-    strncat(response, json, response_length - header_length - 1); // Use strncat with proper size
+    strncat(response, json, response_length - header_length - 1);
 
     if (write(client_socket, response, response_length - 1) < 0)
     {
