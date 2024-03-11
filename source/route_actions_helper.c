@@ -14,6 +14,7 @@
 
 #include "route_actions_helper.h"
 #include "router.h"
+#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -223,7 +224,10 @@ char *read_html_file(const char *filename)
         return NULL;
     }
 
+    resource_mutex_lock(filename);
+
     FILE *file = fopen(filename, "r");
+
     if (file == NULL)
     {
         fprintf(stderr, "Error opening file: %s\n", filename);
@@ -249,6 +253,8 @@ char *read_html_file(const char *filename)
 
     fclose(file);
 
+    resource_mutex_unlock(filename);
+
     return content;
 }
 
@@ -266,6 +272,8 @@ char *read_html_file(const char *filename)
  */
 uint8_t *read_binary_file(const char *filename, size_t *file_size)
 {
+    resource_mutex_lock(filename);
+
     FILE *file = fopen(filename, "rb");
     if (file == NULL)
     {
@@ -288,6 +296,8 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
     size_t bytes_read = fread(content, 1, *file_size, file);
 
     fclose(file);
+
+    resource_mutex_unlock(filename);
 
     return content;
 }

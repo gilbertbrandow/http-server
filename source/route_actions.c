@@ -185,6 +185,8 @@ int create_comment(int client_socket, struct http_request *http_request)
         return send_json_response(client_socket, json_response, 400, "Bad Request");
     }
 
+    resource_mutex_lock("data/comments.txt");
+
     FILE *file = fopen("data/comments.txt", "a");
 
     if (file == NULL)
@@ -199,6 +201,8 @@ int create_comment(int client_socket, struct http_request *http_request)
     fprintf(file, "------------------------------\n");
 
     fclose(file);
+
+    resource_mutex_unlock("data/comments.txt");
 
     const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
     return send_json_response(client_socket, json_response, 201, "Created");

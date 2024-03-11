@@ -22,8 +22,6 @@
 #include <unistd.h>
 #include <pthread.h>
 
-pthread_mutex_t terminal_mutex = PTHREAD_MUTEX_INITIALIZER;
-
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
 
@@ -137,12 +135,15 @@ void *handle_connection(void *client_socket_ptr)
     char *status_message = handle_request(client_socket);
 
     pthread_mutex_lock(&terminal_mutex);
+
     printf("Server Log: %s\n", status_message);
+
     pthread_mutex_unlock(&terminal_mutex);
 
     free(status_message);
 
     shutdown(client_socket, SHUT_RDWR);
+
     close(client_socket);
 
     pthread_exit(NULL);
@@ -159,6 +160,8 @@ void handle_shutdown(int signum)
         shutdown(global_server->socket, SHUT_RDWR);
         close(global_server->socket);
     }
+
+    free_resource_mutex_list();
 
     return;
 }
