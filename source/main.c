@@ -13,6 +13,7 @@
 #include "server.h"
 #include "router.h"
 #include "route_actions.h"
+#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,13 +22,15 @@
 #include <unistd.h>
 #include <pthread.h>
 
+pthread_mutex_t terminal_mutex = PTHREAD_MUTEX_INITIALIZER;
+
 volatile sig_atomic_t shutdown_flag = 0;
 struct server *global_server;
 
 /**
  * @brief Array of routes as availabled endpoints.
  */
-struct route routes[] = {
+const struct route routes[] = {
     {GET, "/", send_index_page},
     {GET, "/frida-kahlo", send_frida_page},
     {GET, "/jean-michel-basquiat", send_jean_page},
@@ -39,7 +42,7 @@ struct route routes[] = {
 /**
  * @brief Number of routes in the array.
  */
-size_t num_routes = sizeof(routes) / sizeof(routes[0]);
+const size_t num_routes = sizeof(routes) / sizeof(routes[0]);
 
 /**
  * @brief Handles the termination signal for graceful shutdown.
@@ -107,13 +110,16 @@ void launch(struct server *server)
     signal(SIGINT, handle_shutdown);
 
     printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
+
     while (!shutdown_flag)
     {
+        printf("Waiting for new connection...\n");
+
         int client_socket = accept(server->socket, (struct sockaddr *)&server->socketaddr_in, (socklen_t *)&address_length);
 
         pthread_t thread;
-        
-        if (pthread_create(&thread, NULL, handle_connection, (void *)&client_socket) != 0)
+
+        if (pthread_create(&thread, NULL, handle_connection, (void *)(intptr_t)client_socket) != 0)
         {
             perror("Error creating thread");
         }
@@ -126,9 +132,19 @@ void launch(struct server *server)
 
 void *handle_connection(void *client_socket_ptr)
 {
-    int client_socket = *((int *)client_socket_ptr);
-    handle_request(client_socket);
+    int client_socket = (int)(intptr_t)client_socket_ptr;
+
+    char *status_message = handle_request(client_socket);
+
+    pthread_mutex_lock(&terminal_mutex);
+    printf("Server Log: %s\n", status_message);
+    pthread_mutex_unlock(&terminal_mutex);
+
+    free(status_message);
+
+    shutdown(client_socket, SHUT_RDWR);
     close(client_socket);
+
     pthread_exit(NULL);
 }
 
@@ -136,13 +152,13 @@ void handle_shutdown(int signum)
 {
     printf("\nReceived termination signal. Initiating graceful shutdown...\n");
 
+    shutdown_flag = 1;
+
     if (global_server != NULL)
     {
         shutdown(global_server->socket, SHUT_RDWR);
         close(global_server->socket);
     }
-
-    shutdown_flag = 1;
 
     return;
 }
