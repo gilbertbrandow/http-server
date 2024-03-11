@@ -14,6 +14,7 @@
 
 #include "route_actions_helper.h"
 #include "router.h"
+#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -223,7 +224,8 @@ char *read_html_file(const char *filename)
         return NULL;
     }
 
-    FILE *file = fopen(filename, "r");
+    FILE *file = open_shared_file(filename, "r");
+
     if (file == NULL)
     {
         fprintf(stderr, "Error opening file: %s\n", filename);
@@ -247,7 +249,7 @@ char *read_html_file(const char *filename)
 
     content[bytes_read] = '\0';
 
-    fclose(file);
+    close_shared_file(file, filename);
 
     return content;
 }
@@ -266,7 +268,8 @@ char *read_html_file(const char *filename)
  */
 uint8_t *read_binary_file(const char *filename, size_t *file_size)
 {
-    FILE *file = fopen(filename, "rb");
+    FILE *file = open_shared_file(filename, "rb");
+
     if (file == NULL)
     {
         fprintf(stderr, "Error opening file: %s\n", filename);
@@ -287,9 +290,41 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
 
     size_t bytes_read = fread(content, 1, *file_size, file);
 
-    fclose(file);
+    close_shared_file(file, filename);
 
     return content;
+}
+
+/**
+ * @brief Opens a shared file with the specified mode.
+ *
+ * This function locks the resource associated with the filename using a mutex
+ * before opening the file with the provided mode.
+ *
+ * @param filename The path of the file to open.
+ * @param restrict_mode The mode with which to open the file (e.g., "r", "w").
+ * @return A pointer to the opened file, or NULL on failure.
+ */
+FILE* open_shared_file(const char *filename, const char *restrict_mode) 
+{
+    resource_mutex_lock(filename);
+    return fopen(filename, restrict_mode);
+}
+
+/**
+ * @brief Closes a shared file.
+ *
+ * This function closes the given file and unlocks the associated resource using a mutex.
+ *
+ * @param file A pointer to the file to be closed.
+ * @param filename The path of the file being closed.
+ * @return 0 on success, EOF on failure.
+ */
+int close_shared_file(FILE *file, const char *filename) 
+{
+    int status = fclose(file);
+    resource_mutex_unlock(filename);
+    return status; 
 }
 
 #endif

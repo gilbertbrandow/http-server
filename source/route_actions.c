@@ -11,7 +11,6 @@
 
 #include "route_actions.h"
 #include "route_actions_helper.h"
-#include "mutex.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -185,7 +184,7 @@ int create_comment(int client_socket, struct http_request *http_request)
         return send_json_response(client_socket, json_response, 400, "Bad Request");
     }
 
-    FILE *file = fopen("data/comments.txt", "a");
+    FILE *file = open_shared_file("data/comments.txt", "a");
 
     if (file == NULL)
     {
@@ -198,7 +197,7 @@ int create_comment(int client_socket, struct http_request *http_request)
     fprintf(file, "Comment: %s\n", comment);
     fprintf(file, "------------------------------\n");
 
-    fclose(file);
+    close_shared_file(file,"data/comments.txt");
 
     const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
     return send_json_response(client_socket, json_response, 201, "Created");
