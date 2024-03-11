@@ -43,7 +43,7 @@ enum request_method
  * @struct http_request
  * @brief Represents an HTTP request.
  */
-struct http_request
+typedef struct http_request
 {
     enum request_method method;  /**< The HTTP request method (e.g., GET, POST). */
     char path[100];              /**< The requested path in the URL. */
@@ -89,9 +89,9 @@ typedef int (*route_action)(int client_socket, struct http_request *http_request
  * HTTP request method, URL pattern, and a function pointer to the associated
  * route action.
  */
-struct route
+typedef struct route
 {
-    enum request_method method; /**< HTTP request method for the route. */
+    const enum request_method method; /**< HTTP request method for the route. */
     const char *url;            /**< URL pattern associated with the route. */
     route_action action;        /**< Function pointer to the route action. */
 };
@@ -102,7 +102,7 @@ struct route
  * The `routes` is to be defined in another source file. It will be accessed by the route-handling
  * functions, providing information on available routes when trying to direct an HTTP request.
  */
-extern struct route routes[];
+extern const struct route routes[];
 
 /**
  * @brief Number of routes in the `routes` array.
@@ -111,7 +111,7 @@ extern struct route routes[];
  * route-handling functions, specifying the total number of routes available for
  * routing incoming HTTP requests.
  */
-extern size_t num_routes;
+extern const size_t num_routes;
 
 /**
  * @brief Parses a string representation of an HTTP request method and returns the corresponding enum value.

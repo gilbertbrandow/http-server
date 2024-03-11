@@ -28,7 +28,7 @@ pthread_mutex_t print_mutex = PTHREAD_MUTEX_INITIALIZER;
 /**
  * @brief Array of routes as availabled endpoints.
  */
-struct route routes[] = {
+const struct route routes[] = {
     {GET, "/", send_index_page},
     {GET, "/frida-kahlo", send_frida_page},
     {GET, "/jean-michel-basquiat", send_jean_page},
@@ -40,7 +40,7 @@ struct route routes[] = {
 /**
  * @brief Number of routes in the array.
  */
-size_t num_routes = sizeof(routes) / sizeof(routes[0]);
+const size_t num_routes = sizeof(routes) / sizeof(routes[0]);
 
 /**
  * @brief Handles the termination signal for graceful shutdown.
@@ -149,7 +149,7 @@ void handle_shutdown(int signum)
     printf("\nReceived termination signal. Initiating graceful shutdown...\n");
 
     shutdown_flag = 1;
-    
+
     if (global_server != NULL)
     {
         shutdown(global_server->socket, SHUT_RDWR);
