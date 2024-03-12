@@ -52,6 +52,12 @@ char *handle_request(int client_socket)
 
     http_request = http_request_constructor(request_data);
 
+    if (http_request.success == 0)
+    {
+        perror("Error parsing the request data");
+        return NULL;
+    }
+
     return route(&http_request, client_socket);
 }
 
@@ -159,7 +165,18 @@ struct http_request http_request_constructor(char *request_data)
 
         if (reading_body)
         {
-            strcat(http_request.body, line);
+            size_t current_length = strlen(http_request.body);
+            size_t line_length = strlen(line);
+
+            if (current_length + line_length < sizeof(http_request.body) - 1)
+            {
+                strcat(http_request.body, line);
+            }
+            else
+            {
+                http_request.success = 0; 
+                return http_request;
+            }
         }
         else if (sscanf(line, "%49[^:]:%199s", key, value) == 2)
         {
@@ -240,6 +257,10 @@ struct http_request http_request_constructor(char *request_data)
             }
         }
     }
+
+    http_request.body[sizeof(http_request.body) - 1] = '\0';
+
+    http_request.success = 1; 
 
     return http_request;
 }

@@ -45,6 +45,7 @@ enum request_method
  */
 struct http_request
 {
+    int success;                 /**< 1 indicates success in parsing request, 0 indicates error. */
     enum request_method method;  /**< The HTTP request method (e.g., GET, POST). */
     char path[100];              /**< The requested path in the URL. */
     char version[10];            /**< The HTTP protocol version (e.g., HTTP/1.1). */
