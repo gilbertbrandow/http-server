@@ -15,6 +15,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+char *value_for_key_json_parser(const char *json_str, const char *key, size_t max_length);
+
 /**
  * @brief Reads the content of an HTML file and returns it as a dynamically allocated string.
  *

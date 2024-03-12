@@ -21,6 +21,43 @@
 #include <string.h>
 #include <unistd.h>
 
+char *value_for_key_json_parser(const char *json_str, const char *key, size_t max_length)
+{
+    const char *key_start = strstr(json_str, key);
+
+    if (key_start == NULL)
+        return NULL;
+
+    const char *value_start = strchr(key_start, ':');
+    if (value_start == NULL)
+        return NULL;
+
+    value_start++;
+    while (*value_start == ' ' || *value_start == '\t' || *value_start == '\n' || *value_start == '\r')
+        value_start++;
+
+    if (*value_start == '\"')
+        value_start++;
+    else
+        return NULL;
+
+    const char *value_end = strchr(value_start, '\"');
+    if (value_end == NULL)
+        return NULL;
+
+    size_t value_length = value_end - value_start;
+
+    if (value_length > max_length)
+        return NULL;
+
+    char *result = malloc(value_length + 1);
+
+    strncpy(result, value_start, value_length);
+    result[value_length] = '\0';
+
+    return result;
+}
+
 /**
  * @brief Sends a redirect response to the client.
  *
