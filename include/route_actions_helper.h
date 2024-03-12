@@ -15,7 +15,23 @@
 #include <stdint.h>
 #include <stddef.h>
 
-char *value_for_key_json_parser(const char *json_str, const char *key, size_t max_length);
+/**
+ * @brief Extracts the value associated with a given key from a JSON string.
+ *
+ * This function searches for the specified key within the JSON string and
+ * retrieves the associated value. It supports values enclosed in double quotes.
+ *
+ * @param json_str The JSON string to search.
+ * @param key The key for which to extract the value.
+ * @param max_length The maximum length of the extracted value.
+ *
+ * @return A dynamically allocated string containing the extracted value,
+ *         or NULL if the key is not found, the JSON format is invalid,
+ *         or the extracted value exceeds the specified maximum length.
+ * 
+ * @note The caller is responsible for freeing the allocated memory.
+ */
+char *get_json_value_for_key(const char *json_str, const char *key, size_t max_length);
 
 /**
  * @brief Reads the content of an HTML file and returns it as a dynamically allocated string.

@@ -87,23 +87,21 @@ int send_vincent_page(int client_socket, struct http_request *http_request);
 int send_image(int client_socket, struct http_request *http_request);
 
 /**
- * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
+ * @brief Creates a new comment based on the provided HTTP request.
  *
- * This function checks the Content-Type of the HTTP request to ensure it is "application/json".
- * If the content type is correct, the function extracts name and comment data from the JSON body
- * of a POST request and appends the information to a file named "comments.txt" in the "data" directory.
+ * This function handles the creation of a new comment by extracting the 'name'
+ * and 'comment' values from the JSON body of the HTTP request. It performs
+ * validation checks on the input values and sends an appropriate JSON response
+ * in case of errors.
  *
- * @param client_socket The socket descriptor for the client connection.
- * @param http_request Pointer to the HTTP request structure containing the request data.
+ * @param client_socket The socket to which the JSON response will be sent.
+ * @param http_request Pointer to the HTTP request structure.
  *
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure, 415 if the Content-Type is unsupported,
- * or 400 if either "name" or "comment" is not found in the request body.
+ * @return Returns RESPONSE_ERROR on failure, or a RESPONSE_SUCCESS code.
  *
- * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
- * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.
- * @note The file is opened in "a" (append) mode, and proper error handling is in place.
- * @note Ensure that the "data" directory exists, and the process has write permissions to it.
- * @note The caller is responsible for sending an appropriate JSON response to the client.
+ * @note The caller is responsible for freeing the memory allocated for 'name' and 'comment'.
+ * @see send_json_response
+ * @see save_comment
  */
 int create_comment(int client_socket, struct http_request *http_request);
 

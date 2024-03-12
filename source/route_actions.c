@@ -109,30 +109,28 @@ int send_image(int client_socket, struct http_request *http_request)
 }
 
 /**
- * @brief Processes a POST request containing JSON data to create a comment and saves it to a file.
+ * @brief Creates a new comment based on the provided HTTP request.
  *
- * This function checks the Content-Type of the HTTP request to ensure it is "application/json".
- * If the content type is correct, the function extracts name and comment data from the JSON body
- * of a POST request and appends the information to a file named "comments.txt" in the "data" directory.
+ * This function handles the creation of a new comment by extracting the 'name'
+ * and 'comment' values from the JSON body of the HTTP request. It performs
+ * validation checks on the input values and sends an appropriate JSON response
+ * in case of errors.
  *
- * @param client_socket The socket descriptor for the client connection.
- * @param http_request Pointer to the HTTP request structure containing the request data.
+ * @param client_socket The socket to which the JSON response will be sent.
+ * @param http_request Pointer to the HTTP request structure.
  *
- * @return Returns RESPONSE_SUCCESS on success, RESPONSE_ERROR on failure, 415 if the Content-Type is unsupported,
- * or 400 if either "name" or "comment" is not found in the request body.
+ * @return Returns RESPONSE_ERROR on failure, or a RESPONSE_SUCCESS code.
  *
- * @note The function processes the JSON body of the POST request to extract the "name" and "comment" fields.
- * @note Extracted information is then appended to a file named "comments.txt" in the "data" directory.
- * @note The file is opened in "a" (append) mode, and proper error handling is in place.
- * @note Ensure that the "data" directory exists, and the process has write permissions to it.
- * @note The caller is responsible for sending an appropriate JSON response to the client.
+ * @note The caller is responsible for freeing the memory allocated for 'name' and 'comment'.
+ * @see send_json_response
+ * @see save_comment
  */
 int create_comment(int client_socket, struct http_request *http_request)
 {
     if (strcmp("application/json", http_request->content_type) != 0)
         return send_json_response(client_socket, "{\"status\": \"error\", \"message\": \"Unsupported Media Type\"}", 415, "Unsupported Media Type");
 
-    char *name = value_for_key_json_parser(http_request->body, "name", NAME_MAX_LENGTH);
+    char *name = get_json_value_for_key(http_request->body, "name", NAME_MAX_LENGTH);
     if (name == NULL)
     {
         char json_buffer[256];
@@ -140,7 +138,7 @@ int create_comment(int client_socket, struct http_request *http_request)
         return send_json_response(client_socket, json_buffer, 400, "Bad Request");
     }
 
-    char *comment = value_for_key_json_parser(http_request->body, "comment", COMMENT_MAX_LENGTH);
+    char *comment = get_json_value_for_key(http_request->body, "comment", COMMENT_MAX_LENGTH);
     if (comment == NULL)
     {
         char json_buffer[256];
@@ -151,12 +149,10 @@ int create_comment(int client_socket, struct http_request *http_request)
     if (save_comment(name, comment) == RESPONSE_ERROR)
         return RESPONSE_ERROR;
 
-    const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
-
     free(name);
     free(comment);
 
-    return send_json_response(client_socket, json_response, 201, "Created");
+    return send_json_response(client_socket, "{\"status\": \"success\", \"message\": \"Comment created\"}", 201, "Created");
 }
 
 /**
