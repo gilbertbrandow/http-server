@@ -69,6 +69,19 @@ int resource_mutex_unlock(const char *resource_path);
  */
 void free_resource_mutex_list();
 
+/**
+ * @brief Print formatted text to the terminal with thread-safe handling.
+ *
+ * This function allows printing formatted text to the terminal with thread-safe
+ * mutex protection. It uses a variable argument list to accept a format string
+ * and additional arguments, similar to the standard printf function.
+ *
+ * @param format A format string, containing format specifiers.
+ * @param ... Additional arguments to be formatted and printed.
+ *
+ * @note Ensure proper synchronization by using this function when printing to the
+ *       terminal in a multithreaded environment.
+ */
 void print_to_terminal(const char *format, ...); 
 
 /**
