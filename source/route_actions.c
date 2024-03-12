@@ -17,6 +17,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#define NAME_MAX_LENGTH 25
+#define COMMENT_MAX_LENGTH 200
+
 /**
  * @brief Generates the HTTP response for the index page.
  *
@@ -127,70 +130,32 @@ int send_image(int client_socket, struct http_request *http_request)
 int create_comment(int client_socket, struct http_request *http_request)
 {
     if (strcmp("application/json", http_request->content_type) != 0)
+        return send_json_response(client_socket, "{\"status\": \"error\", \"message\": \"Unsupported Media Type\"}", 415, "Unsupported Media Type");
+
+    char *name = value_for_key_json_parser(http_request->body, "name", NAME_MAX_LENGTH);
+    if (name == NULL)
     {
-        const char *json_response = "{\"status\": \"error\", \"message\": \"Unsupported Media Type\"}";
-        return send_json_response(client_socket, json_response, 415, "Unsupported Media Type");
+        char json_buffer[256];
+        snprintf(json_buffer, sizeof(json_buffer), "{\"status\": \"error\", \"message\": \"Name is required and must be a string between 1 & %d characters\"}", NAME_MAX_LENGTH);
+        return send_json_response(client_socket, json_buffer, 400, "Bad Request");
     }
 
-    const char *ptr = http_request->body;
-
-    int next_line_is_name = 0;
-    int next_line_is_comment = 0;
-    char name[200];
-    char comment[200];
-
-    while (*ptr != '\0')
+    char *comment = value_for_key_json_parser(http_request->body, "comment", COMMENT_MAX_LENGTH);
+    if (comment == NULL)
     {
-        ptr = strchr(ptr, '\"');
-        
-        if (ptr == NULL)
-        {
-            break;
-        }
-
-        ptr++;
-
-        const char *end_ptr = strchr(ptr, '\"');
-
-        if (end_ptr == NULL)
-        {
-            end_ptr = strchr(ptr, '\0');
-        }
-
-        if (strncmp(ptr, "name", end_ptr - ptr) == 0)
-        {
-            next_line_is_name = 1;
-        }
-        else if (strncmp(ptr, "comment", end_ptr - ptr) == 0)
-        {
-            next_line_is_comment = 1;
-        }
-        else if (next_line_is_name)
-        {
-            next_line_is_name = 0;
-            snprintf(name, sizeof(name), "%.*s", (int)(end_ptr - ptr), ptr);
-        }
-        else if (next_line_is_comment)
-        {
-            next_line_is_comment = 0;
-            snprintf(comment, sizeof(comment), "%.*s", (int)(end_ptr - ptr), ptr);
-        }
-
-        ptr = end_ptr + 1;
-    }
-
-    if (name[0] == '\0' || comment[0] == '\0')
-    {
-        const char *json_response = "{\"status\": \"error\", \"message\": \"Bad Request: 'name' and 'comment' cannot be empty\"}";
-        return send_json_response(client_socket, json_response, 400, "Bad Request");
+        char json_buffer[256];
+        snprintf(json_buffer, sizeof(json_buffer), "{\"status\": \"error\", \"message\": \"Comment is required and must be a string between 1 & %d characters\"}", COMMENT_MAX_LENGTH);
+        return send_json_response(client_socket, json_buffer, 400, "Bad Request");
     }
 
     if (save_comment(name, comment) == RESPONSE_ERROR)
-    {
         return RESPONSE_ERROR;
-    }
 
     const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
+
+    free(name);
+    free(comment);
+
     return send_json_response(client_socket, json_response, 201, "Created");
 }
 
