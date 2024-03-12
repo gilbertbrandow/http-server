@@ -108,7 +108,7 @@ void launch(struct server *server)
 
     signal(SIGINT, handle_shutdown);
 
-    printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
+    print_to_terminal("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
 
     while (!shutdown_flag)
     {
@@ -147,7 +147,7 @@ void *handle_connection(void *client_socket_ptr)
 
 void handle_shutdown(int signum)
 {
-    printf("\nReceived termination signal. Initiating graceful shutdown...\n");
+    print_to_terminal("\nReceived termination signal. Initiating graceful shutdown...\n");
 
     shutdown_flag = 1;
 
