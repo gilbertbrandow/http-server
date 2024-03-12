@@ -142,6 +142,7 @@ int create_comment(int client_socket, struct http_request *http_request)
     while (*ptr != '\0')
     {
         ptr = strchr(ptr, '\"');
+        
         if (ptr == NULL)
         {
             break;
@@ -184,20 +185,10 @@ int create_comment(int client_socket, struct http_request *http_request)
         return send_json_response(client_socket, json_response, 400, "Bad Request");
     }
 
-    FILE *file = open_shared_file("data/comments.txt", "a");
-
-    if (file == NULL)
+    if (save_comment(name, comment) == RESPONSE_ERROR)
     {
-        perror("Error opening file 'comments.txt'");
         return RESPONSE_ERROR;
     }
-
-    fprintf(file, "------------------------------\n");
-    fprintf(file, "Name: %s\n", name);
-    fprintf(file, "Comment: %s\n", comment);
-    fprintf(file, "------------------------------\n");
-
-    close_shared_file(file,"data/comments.txt");
 
     const char *json_response = "{\"status\": \"success\", \"message\": \"Comment created\"}";
     return send_json_response(client_socket, json_response, 201, "Created");

@@ -134,11 +134,7 @@ void *handle_connection(void *client_socket_ptr)
 
     char *status_message = handle_request(client_socket);
 
-    pthread_mutex_lock(&terminal_mutex);
-
-    printf("Server Log: %s\n", status_message);
-
-    pthread_mutex_unlock(&terminal_mutex);
+    print_to_terminal("Server Log: %s\n", status_message);
 
     free(status_message);
 
