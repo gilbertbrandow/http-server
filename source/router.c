@@ -87,7 +87,7 @@ char *route(struct http_request *http_request, int client_socket)
                     return NULL;
                 }
 
-                if (asprintf(&status_message, "Connection served 500 (Internal Server Error). Trying to access: %s", http_request->path) < 0)
+                if (asprintf(&status_message, "Connection served 500 (Internal Server Error).  URI: '%s', METHOD: '%s'", http_request->path, request_method_to_string(http_request->method)) < 0)
                 {
                     perror("asprintf");
                     return NULL;
@@ -96,7 +96,7 @@ char *route(struct http_request *http_request, int client_socket)
                 return status_message;
             }
 
-            if (asprintf(&status_message, "Connection served successfully. Request path: %s", http_request->path) < 0)
+            if (asprintf(&status_message, "Connection successfully served. URI: '%s', METHOD: '%s'", http_request->path, request_method_to_string(http_request->method)) < 0)
             {
                 perror("asprintf");
                 return NULL;
@@ -114,7 +114,7 @@ char *route(struct http_request *http_request, int client_socket)
         return NULL;
     }
 
-    if (asprintf(&status_message, "Connection served 404. Trying to access resource: %s", http_request->path) < 0)
+    if (asprintf(&status_message, "Connection served 404. URI: '%s', METHOD: '%s'", http_request->path, request_method_to_string(http_request->method)) < 0)
     {
         perror("asprintf");
         return NULL;
@@ -258,26 +258,62 @@ enum request_method parse_request_method(const char *method_string)
 {
     if (strcmp(method_string, "GET") == 0)
         return GET;
-    else if (strcmp(method_string, "POST") == 0)
+    if (strcmp(method_string, "POST") == 0)
         return POST;
-    else if (strcmp(method_string, "PUT") == 0)
+    if (strcmp(method_string, "PUT") == 0)
         return PUT;
-    else if (strcmp(method_string, "DELETE") == 0)
+    if (strcmp(method_string, "DELETE") == 0)
         return DELETE;
-    else if (strcmp(method_string, "PATCH") == 0)
+    if (strcmp(method_string, "PATCH") == 0)
         return PATCH;
-    else if (strcmp(method_string, "HEAD") == 0)
+    if (strcmp(method_string, "HEAD") == 0)
         return HEAD;
-    else if (strcmp(method_string, "OPTIONS") == 0)
+    if (strcmp(method_string, "OPTIONS") == 0)
         return OPTIONS;
-    else if (strcmp(method_string, "TRACE") == 0)
+    if (strcmp(method_string, "TRACE") == 0)
         return TRACE;
-    else if (strcmp(method_string, "CONNECT") == 0)
+    if (strcmp(method_string, "CONNECT") == 0)
         return CONNECT;
-    else
+
+    fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
+    exit(EXIT_FAILURE);
+}
+
+/**
+ * @brief Convert an enum request_method to its corresponding string representation.
+ *
+ * This function takes an enum value representing an HTTP request method and returns
+ * its string representation.
+ *
+ * @param method Enum value of type request_method to be converted.
+ * @return A constant pointer to the string representation of the request method.
+ * @note The returned string is not dynamically allocated and should not be modified.
+ * @warning If an invalid enum value is provided, the behavior is undefined.
+ */
+const char *request_method_to_string(enum request_method method)
+{
+    switch (method)
     {
-        fprintf(stderr, "Unallowed request method '%s'.\n", method_string);
-        exit(EXIT_FAILURE);
+    case GET:
+        return "GET";
+    case POST:
+        return "POST";
+    case PUT:
+        return "PUT";
+    case DELETE:
+        return "DELETE";
+    case PATCH:
+        return "PATCH";
+    case HEAD:
+        return "HEAD";
+    case OPTIONS:
+        return "OPTIONS";
+    case TRACE:
+        return "TRACE";
+    case CONNECT:
+        return "CONNECT";
+    default:
+        return "UNKNOWN";
     }
 }
 

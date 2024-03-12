@@ -126,6 +126,19 @@ extern const size_t num_routes;
 enum request_method parse_request_method(const char *method_string);
 
 /**
+ * @brief Convert an enum request_method to its corresponding string representation.
+ *
+ * This function takes an enum value representing an HTTP request method and returns
+ * its string representation.
+ *
+ * @param method Enum value of type request_method to be converted.
+ * @return A constant pointer to the string representation of the request method.
+ * @note The returned string is not dynamically allocated and should not be modified.
+ * @warning If an invalid enum value is provided, the behavior is undefined.
+ */
+const char *request_method_to_string(enum request_method method);
+
+/**
  * @brief Constructs an HTTP request structure from a request_data.
  *
  * This function parses the provided clear text request and initializes an HTTP request structure.
