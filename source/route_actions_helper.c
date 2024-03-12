@@ -48,7 +48,6 @@ int send_redirect_response(int client_socket, const char *redirect_url)
 
     if (write(client_socket, response, response_length - 1) < 0)
     {
-        perror("Error writing to client");
         free(response);
         return RESPONSE_ERROR;
     }
@@ -95,7 +94,6 @@ int send_json_response(int client_socket, const char *json, int status_code, con
 
     if (response == NULL)
     {
-        perror("Error allocating memory");
         return RESPONSE_ERROR;
     }
 
@@ -104,7 +102,6 @@ int send_json_response(int client_socket, const char *json, int status_code, con
 
     if (write(client_socket, response, response_length - 1) < 0)
     {
-        perror("Error writing to client");
         free(response);
         return RESPONSE_ERROR;
     }
@@ -149,7 +146,6 @@ int send_html_page(int client_socket, const char *html_filename)
 
     if (write(client_socket, response, strlen(response)) < 0)
     {
-        perror("Error writing to client");
         free(response);
         free(response_body);
         return RESPONSE_ERROR;
@@ -220,7 +216,6 @@ char *read_html_file(const char *filename)
 {
     if (strlen(filename) <= 5 || strcmp(filename + strlen(filename) - 5, ".html") != 0)
     {
-        fprintf(stderr, "Invalid HTML file: '%s'\n", filename);
         return NULL;
     }
 
@@ -228,7 +223,6 @@ char *read_html_file(const char *filename)
 
     if (file == NULL)
     {
-        fprintf(stderr, "Error opening file: %s\n", filename);
         return NULL;
     }
 
@@ -240,8 +234,7 @@ char *read_html_file(const char *filename)
 
     if (content == NULL)
     {
-        fclose(file);
-        fprintf(stderr, "Memory allocation error\n");
+        close_shared_file(file, filename);
         return NULL;
     }
 
@@ -272,7 +265,6 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
 
     if (file == NULL)
     {
-        fprintf(stderr, "Error opening file: %s\n", filename);
         return NULL;
     }
 
@@ -281,10 +273,10 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
     fseek(file, 0, SEEK_SET);
 
     uint8_t *content = (uint8_t *)malloc(*file_size);
+
     if (content == NULL)
     {
-        fclose(file);
-        fprintf(stderr, "Memory allocation error\n");
+        close_shared_file(file, filename);
         return NULL;
     }
 
@@ -295,36 +287,23 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
     return content;
 }
 
-/**
- * @brief Opens a shared file with the specified mode.
- *
- * This function locks the resource associated with the filename using a mutex
- * before opening the file with the provided mode.
- *
- * @param filename The path of the file to open.
- * @param restrict_mode The mode with which to open the file (e.g., "r", "w").
- * @return A pointer to the opened file, or NULL on failure.
- */
-FILE* open_shared_file(const char *filename, const char *restrict_mode) 
+int save_comment(char *name, char *comment)
 {
-    resource_mutex_lock(filename);
-    return fopen(filename, restrict_mode);
-}
+    FILE *file = open_shared_file("data/comments.txt", "a");
 
-/**
- * @brief Closes a shared file.
- *
- * This function closes the given file and unlocks the associated resource using a mutex.
- *
- * @param file A pointer to the file to be closed.
- * @param filename The path of the file being closed.
- * @return 0 on success, EOF on failure.
- */
-int close_shared_file(FILE *file, const char *filename) 
-{
-    int status = fclose(file);
-    resource_mutex_unlock(filename);
-    return status; 
+    if (file == NULL)
+    {
+        return RESPONSE_ERROR;
+    }
+
+    fprintf(file, "------------------------------\n");
+    fprintf(file, "Name: %s\n", name);
+    fprintf(file, "Comment: %s\n", comment);
+    fprintf(file, "------------------------------\n");
+
+    close_shared_file(file, "data/comments.txt");
+
+    return RESPONSE_SUCCESS;
 }
 
 #endif

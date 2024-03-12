@@ -16,6 +16,8 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <stdarg.h>
 
 /**
  * @brief Mutex list head pointer.
@@ -46,9 +48,8 @@ int resource_mutex_lock(const char *resource_path)
     pthread_mutex_lock(&resource_mutex_list_mutex);
 
     struct resource_mutex *current = resource_mutex_list;
-    struct resource_mutex *last = NULL;
 
-    while (current)
+    while (current && current->next)
     {
         if (strcmp(current->resource_path, resource_path) == 0)
         {
@@ -57,7 +58,6 @@ int resource_mutex_lock(const char *resource_path)
             return 0;
         }
 
-        last = current;
         current = current->next;
     }
 
@@ -70,19 +70,13 @@ int resource_mutex_lock(const char *resource_path)
     }
 
     new_resource_mutex->next = NULL;
-
     strcpy(new_resource_mutex->resource_path, resource_path);
-
     pthread_mutex_init(&(new_resource_mutex->mutex), NULL);
 
-    if (last)
-    {
-        last->next = new_resource_mutex;
-    }
+    if (current)
+        current->next = new_resource_mutex;
     else
-    {
         resource_mutex_list = new_resource_mutex;
-    }
 
     pthread_mutex_lock(&(new_resource_mutex->mutex));
     pthread_mutex_unlock(&resource_mutex_list_mutex);
@@ -104,7 +98,6 @@ int resource_mutex_unlock(const char *resource_path)
     pthread_mutex_lock(&resource_mutex_list_mutex);
 
     struct resource_mutex *current = resource_mutex_list;
-    struct resource_mutex *last = NULL;
 
     while (current)
     {
@@ -115,7 +108,6 @@ int resource_mutex_unlock(const char *resource_path)
             return 0;
         }
 
-        last = current;
         current = current->next;
     }
 
@@ -131,20 +123,77 @@ void free_resource_mutex_list()
 {
     pthread_mutex_lock(&resource_mutex_list_mutex);
 
-    struct resource_mutex *current = resource_mutex_list;
-    struct resource_mutex *next;
-
-    while (current)
+    while (resource_mutex_list)
     {
-        next = current->next;
+        struct resource_mutex *current = resource_mutex_list;
+
+        resource_mutex_list = current->next;
+
         pthread_mutex_destroy(&(current->mutex));
+
         free(current);
-        current = next;
     }
 
-    resource_mutex_list = NULL;
-
     pthread_mutex_unlock(&resource_mutex_list_mutex);
+}
+
+
+/**
+ * @brief Print formatted text to the terminal with thread-safe handling.
+ *
+ * This function allows printing formatted text to the terminal with thread-safe
+ * mutex protection. It uses a variable argument list to accept a format string
+ * and additional arguments, similar to the standard printf function.
+ *
+ * @param format A format string, containing format specifiers.
+ * @param ... Additional arguments to be formatted and printed.
+ *
+ * @note Ensure proper synchronization by using this function when printing to the
+ *       terminal in a multithreaded environment.
+ */
+void print_to_terminal(const char *format, ...) {
+
+    pthread_mutex_lock(&terminal_mutex);
+
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+
+    pthread_mutex_unlock(&terminal_mutex);
+}
+
+
+/**
+ * @brief Opens a shared file with the specified mode.
+ *
+ * This function locks the resource associated with the filename using a mutex
+ * before opening the file with the provided mode.
+ *
+ * @param filename The path of the file to open.
+ * @param restrict_mode The mode with which to open the file (e.g., "r", "w").
+ * @return A pointer to the opened file, or NULL on failure.
+ */
+FILE* open_shared_file(const char *filename, const char *restrict_mode) 
+{
+    resource_mutex_lock(filename);
+    return fopen(filename, restrict_mode);
+}
+
+/**
+ * @brief Closes a shared file.
+ *
+ * This function closes the given file and unlocks the associated resource using a mutex.
+ *
+ * @param file A pointer to the file to be closed.
+ * @param filename The path of the file being closed.
+ * @return 0 on success, EOF on failure.
+ */
+int close_shared_file(FILE *file, const char *filename) 
+{
+    int status = fclose(file);
+    resource_mutex_unlock(filename);
+    return status; 
 }
 
 #endif
