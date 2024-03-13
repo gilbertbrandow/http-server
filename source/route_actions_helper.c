@@ -136,9 +136,7 @@ int send_json_response(int client_socket, const char *json, int status_code, con
     const char *response_format = "HTTP/1.1 %d %s\r\nContent-Type: application/json\r\n\r\n";
 
     if (json == NULL || status_phrase == NULL)
-    {
         return RESPONSE_ERROR;
-    }
 
     size_t header_length = snprintf(NULL, 0, response_format, status_code, status_phrase);
     size_t response_length = header_length + strlen(json) + 1;
@@ -146,9 +144,7 @@ int send_json_response(int client_socket, const char *json, int status_code, con
     char *response = malloc(response_length);
 
     if (response == NULL)
-    {
         return RESPONSE_ERROR;
-    }
 
     snprintf(response, header_length + 1, response_format, status_code, status_phrase);
     strncat(response, json, response_length - header_length - 1);
@@ -230,9 +226,7 @@ int send_binary_data(int client_socket, const char *content_type, const char *bi
     uint8_t *binary_content = read_binary_file(binary_filename, &binary_size);
 
     if (binary_content == NULL)
-    {
         return RESPONSE_ERROR;
-    }
 
     char response_header[256];
     snprintf(response_header, sizeof(response_header), "HTTP/1.1 200 OK\r\nContent-Type: %s\r\n\r\n", content_type);
@@ -268,16 +262,12 @@ int send_binary_data(int client_socket, const char *content_type, const char *bi
 char *read_html_file(const char *filename)
 {
     if (strlen(filename) <= 5 || strcmp(filename + strlen(filename) - 5, ".html") != 0)
-    {
         return NULL;
-    }
 
     FILE *file = open_shared_file(filename, "r");
 
     if (file == NULL)
-    {
         return NULL;
-    }
 
     fseek(file, 0, SEEK_END);
     long file_size = ftell(file);
@@ -317,9 +307,7 @@ uint8_t *read_binary_file(const char *filename, size_t *file_size)
     FILE *file = open_shared_file(filename, "rb");
 
     if (file == NULL)
-    {
         return NULL;
-    }
 
     fseek(file, 0, SEEK_END);
     *file_size = ftell(file);
@@ -345,9 +333,7 @@ int save_comment(char *name, char *comment)
     FILE *file = open_shared_file("data/comments.txt", "a");
 
     if (file == NULL)
-    {
         return RESPONSE_ERROR;
-    }
 
     fprintf(file, "------------------------------\n");
     fprintf(file, "Name: %s\n", name);

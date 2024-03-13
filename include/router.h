@@ -74,7 +74,7 @@ struct http_request
  * A `route_action` function is invoked when a specific route is matched, and it
  * contains the logic for handling the associated HTTP request. The function writes
  * the HTTP response directly to the client socket and returns a response constant
- * indicating success or a specific error condition.
+ * indicating success or error.
  *
  * @param client_socket The client socket to which the HTTP response is written.
  * @return A response constant indicating the outcome of the route action.
@@ -92,9 +92,9 @@ typedef int (*route_action)(int client_socket, struct http_request *http_request
  */
 struct route
 {
-    const enum request_method method; /**< HTTP request method for the route. */
-    const char *url;            /**< URL pattern associated with the route. */
-    route_action action;        /**< Function pointer to the route action. */
+    const enum request_method method;   /**< HTTP request method for the route. */
+    const char *url;                    /**< URL pattern associated with the route. */
+    route_action action;                /**< Function pointer to the route action. */
 };
 
 /**

@@ -71,8 +71,6 @@ struct server server_constructor(
  * @brief Launches the server and listens for incoming connections.
  *
  * This function sets up a server to listen for incoming connections on the specified domain and port.
- * It continuously accepts incoming connections, reads data from the client, sends a predefined response,
- * and then closes the connection.
  *
  * @param server A pointer to the server structure containing server configuration and state.
  */

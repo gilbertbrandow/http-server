@@ -169,12 +169,10 @@ struct http_request http_request_constructor(char *request_data)
             size_t line_length = strlen(line);
 
             if (current_length + line_length < sizeof(http_request.body) - 1)
-            {
                 strcat(http_request.body, line);
-            }
             else
             {
-                http_request.success = 0; 
+                http_request.success = 0;
                 return http_request;
             }
         }
@@ -260,7 +258,7 @@ struct http_request http_request_constructor(char *request_data)
 
     http_request.body[sizeof(http_request.body) - 1] = '\0';
 
-    http_request.success = 1; 
+    http_request.success = 1;
 
     return http_request;
 }
@@ -357,11 +355,8 @@ int is_route_matching(const char *pattern, const char *path)
     if (pattern[0] == '^')
     {
         pattern++;
-
         return strncmp(pattern, path, strlen(pattern));
     }
     else
-    {
         return strcmp(pattern, path);
-    }
 }

@@ -108,7 +108,7 @@ void launch(struct server *server)
 
     signal(SIGINT, handle_shutdown);
 
-    print_to_terminal("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
+    printf("<-- READY TO CONNECT ON %s:%d -->\n", inet_ntoa(server->socketaddr_in.sin_addr), server->port);
 
     while (!shutdown_flag)
     {
