@@ -1,7 +1,16 @@
+# Detect OS
+UNAME_S := $(shell uname -s)
+
+# Default compiler and flags
 CC = gcc
 CFLAGS = -I include
 SRC_DIR = source
 OBJ_DIR = source/bin
+
+# Linux needs -pthread
+ifeq ($(UNAME_S),Linux)
+    CC += -pthread
+endif
 
 # List of source files
 SRCS = $(wildcard $(SRC_DIR)/*.c)
